@@ -12,9 +12,13 @@ import { FaMapLocationDot } from 'react-icons/fa6';
 import { RiUserLocationFill } from 'react-icons/ri';
 import { LuMonitorX } from 'react-icons/lu';
 import { IoClose } from 'react-icons/io5';
+import LocationDisabledIcon from '@mui/icons-material/LocationDisabled';
+import DevicesOtherIcon from '@mui/icons-material/DevicesOther';
+import TrackChangesIcon from '@mui/icons-material/TrackChanges';
 
 const Sidebar = ({ isOpen, toggleSidebar }) => {
   const [locationDropdownOpen, setLocationDropdownOpen] = useState(false);
+  const [deviceTracing, setDeviceTracing] = useState(false);
   const [sensitiveAreasDropdownOpen, setSensitiveAreasDropdownOpen] =
     useState(false);
 
@@ -31,7 +35,7 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
 
   return (
     <div
-      className={`fixed top-0 left-0 h-full bg-mainBlack text-white border-r-[1px] border-r-gray-700 w-64 transform ${
+      className={`fixed top-0 left-0 h-full bg-mainBlack text-white border-r-[1px] border-r-gray-700 w-64 transform overflow-y-auto ${
         isOpen ? 'translate-x-0' : '-translate-x-full'
       } lg:translate-x-0 transition-transform duration-300 ease-in-out z-40 shadow-lg`}
     >
@@ -118,14 +122,18 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
             </ul>
           )}
         </li>
+
+        {/* Device Tracing Dropdown */}
+
         <li>
-          <Link
-            to="/device-tracing"
-            className={`flex items-center px-4 py-2 ${
-              isActive('/device-tracing')
-                ? 'bg-gray-700 rounded-l-[5px]'
+          <div
+            onClick={handleToggle(setDeviceTracing)}
+            className={`flex items-center px-4 py-3 ${
+              location.pathname.includes('/manage-devices') ||
+              location.pathname.includes('/monitor-devices')
+                ? 'text-gray-400 rounded-l-[5px]'
                 : 'hover:bg-gray-700 hover:rounded-l-[5px]'
-            }`}
+            } cursor-pointer`}
           >
             <img
               src="/device_tracking.png"
@@ -133,8 +141,45 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
               alt="Device Tracing"
             />
             <span>Device Tracing</span>
-          </Link>
+            {deviceTracing ? (
+              <FiChevronUp className="ml-auto" />
+            ) : (
+              <FiChevronDown className="ml-auto" />
+            )}
+          </div>
+          {deviceTracing && (
+            <ul className="ml-8 space-y-1">
+              <li>
+                <Link
+                  to="/manage-devices"
+                  className={`flex items-center px-4 py-2 ${
+                    isActive('/manage-devices')
+                      ? 'bg-gray-700 rounded-l-[5px]'
+                      : 'hover:bg-gray-700 hover:rounded-l-[5px]'
+                  }`}
+                >
+                  <DevicesOtherIcon className="mr-3" sx={{ fontSize: 18 }} />
+                  <span>My Devices</span>
+                </Link>
+              </li>
+              <li>
+                <Link
+                  to="/monitor-devices"
+                  className={`flex items-center px-4 py-2 ${
+                    isActive('/monitor-devices')
+                      ? 'bg-gray-700 rounded-l-[5px]'
+                      : 'hover:bg-gray-700 hover:rounded-l-[5px]'
+                  }`}
+                >
+                  <TrackChangesIcon className="mr-3" sx={{ fontSize: 18 }} />
+                  <span>Monitor devices</span>
+                </Link>
+              </li>
+            </ul>
+          )}
         </li>
+
+        {/* Emergency alert */}
         <li>
           <Link
             to="/emergency-alert"
@@ -179,8 +224,11 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
                       : 'hover:bg-gray-700 hover:rounded-l-[5px]'
                   }`}
                 >
-                  <MdSettings className="mr-3 h-4 w-4" />
-                  <span>Add a Sensitive Area</span>
+                  <LocationDisabledIcon
+                    className="mr-3"
+                    sx={{ fontSize: 18 }}
+                  />
+                  <span>Sensitive Areas</span>
                 </Link>
               </li>
               <li>
