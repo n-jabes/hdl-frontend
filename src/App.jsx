@@ -12,6 +12,7 @@ import EmergencyAlert from './components/pages/EmergencyAlert';
 import AddSensitiveArea from './components/pages/AddSensitiveArea';
 import ManageDevices from './components/pages/ManageDevices';
 import MonitorDevices from './components/pages/MonitorDevices';
+import UploadFiles from './components/pages/UploadFiles';
 
 function App() {
   const isAuthenticated = true;
@@ -107,6 +108,16 @@ function App() {
             element={
               <ProtectedRoutes isAuthenticated={isAuthenticated}>
                 <Layout>Send Alert</Layout>
+              </ProtectedRoutes>
+            }
+          />
+          <Route
+            path="/upload"
+            element={
+              <ProtectedRoutes isAuthenticated={isAuthenticated}>
+                <Layout>
+                  <UploadFiles />
+                </Layout>
               </ProtectedRoutes>
             }
           />

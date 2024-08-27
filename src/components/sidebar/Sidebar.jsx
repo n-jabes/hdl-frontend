@@ -261,6 +261,21 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
             <span>Send Alert</span>
           </Link>
         </li>
+
+        {/* Form to upload */}
+        <li>
+          <Link
+            to="/upload"
+            className={`flex items-center px-4 py-3 ${
+              isActive('/upload')
+                ? 'bg-gray-700 rounded-l-[5px]'
+                : 'hover:bg-gray-700 hover:rounded-l-[5px]'
+            }`}
+          >
+            <MdCrisisAlert className="mr-3 h-4 w-4" />
+            <span>Upload Files</span>
+          </Link>
+        </li>
       </ul>
     </div>
   );
