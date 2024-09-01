@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import {
   MdDashboard,
@@ -15,12 +15,14 @@ import { IoClose } from 'react-icons/io5';
 import LocationDisabledIcon from '@mui/icons-material/LocationDisabled';
 import DevicesOtherIcon from '@mui/icons-material/DevicesOther';
 import TrackChangesIcon from '@mui/icons-material/TrackChanges';
+import axios from 'axios';
 
 const Sidebar = ({ isOpen, toggleSidebar }) => {
   const [locationDropdownOpen, setLocationDropdownOpen] = useState(false);
   const [deviceTracing, setDeviceTracing] = useState(false);
   const [sensitiveAreasDropdownOpen, setSensitiveAreasDropdownOpen] =
     useState(false);
+  const [allSubscribers, setAllSubscribers] = useState([]);
 
   const location = useLocation(); // Get the current location
 
@@ -32,6 +34,35 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
     e.preventDefault();
     toggleSidebar();
   };
+
+  // const GetAllSubscribers = async () => {
+  //   try {
+  //     const response = await axios.get(
+  //       'https://hdl-backend.onrender.com/subscribers'
+  //     );
+  //     console.log('Subscriber 1: ', response?.data?.data?.users[0]);
+  //     setAllSubscribers(response?.data?.data?.users);
+  //   } catch (error) {
+  //     console.log('Failed to fetch subscribers', error);
+  //   }
+  // };
+
+  // useEffect(() => {
+  //   GetAllSubscribers();
+  // }, []);
+
+  // const subscriberHeaders = [
+  //   '#',
+  //   'Time',
+  //   'IMSI',
+  //   'MSISDN',
+  //   'IMEI',
+  //   'R (Radio Access Type)',
+  //   'MM (Mobile Management State)',
+  //   'Location',
+  //   'Site Name',
+  //   'Sector Location',
+  // ];
 
   return (
     <div
