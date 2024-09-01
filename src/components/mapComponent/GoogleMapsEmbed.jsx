@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useCallback, useRef, useEffect } from 'react';
 import {
   GoogleMap,
   MarkerF,
@@ -17,13 +17,19 @@ const defaultCenter = {
 };
 
 const GoogleMapsEmbed = React.memo(({ coordinates }) => {
+  const mapRef = useRef(null);
   const { isLoaded } = useJsApiLoader({
     id: 'f147f16e33a7b0e0',
     googleMapsApiKey: 'AIzaSyDJOXNvQcvI8m7BdR5bc4xmDvxE_wly5Sg',
   });
 
-  const onLoad = React.useCallback(
-    (map) => {
+  const onLoad = useCallback((map) => {
+    mapRef.current = map; // Store the map instance in the ref
+  }, []);
+
+  useEffect(() => {
+    if (mapRef.current) {
+      const map = mapRef.current;
       if (coordinates.length === 1) {
         map.setCenter(coordinates[0]);
         map.setZoom(14);
@@ -35,9 +41,8 @@ const GoogleMapsEmbed = React.memo(({ coordinates }) => {
         map.setCenter(defaultCenter);
         map.setZoom(12);
       }
-    },
-    [coordinates]
-  );
+    }
+  }, [coordinates]);
 
   const singleIcon = 'http://maps.google.com/mapfiles/ms/icons/red-dot.png';
   const startIcon = 'http://maps.google.com/mapfiles/ms/icons/green-dot.png';

@@ -40,7 +40,8 @@ const Home = () => {
           count: index + 1,
           startTime: formatDateToYMDHM(subscriber.startTime),
           IMSI: subscriber.IMSI,
-          MSISDN: subscriber.MSISDN,
+          MSISDN: subscriber.MSISDN, // Keep the original MSISDN
+          maskedMSISDN: '*******', // Masked MSISDN value for display
           IMEI: subscriber.IMEI,
           MM: subscriber.MM,
           R: subscriber.R,
@@ -63,7 +64,7 @@ const Home = () => {
   const extractCI = (location) => {
     console.log('location to extract: ', location);
     if (!location || location === '?') {
-      console.log('Invalid location')
+      console.log('Invalid location');
       return null;
     }
     const parts = location.split('-');
