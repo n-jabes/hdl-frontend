@@ -37,16 +37,18 @@ const Layout = ({ children }) => {
   ];
 
   return (
-    <div className="flex h-screen overflow-hidden">
+    <div className="flex w-[100vw] h-screen overflow-hidden">
       <Sidebar
         isOpen={isSidebarOpen}
         toggleSidebar={toggleSidebar}
         sidebarFields={sidebarFields}
       />
-      <div className="flex-1 w-full flex flex-col ml-0 lg:ml-64 transition-all duration-300">
+      {/* <div className="w-full flex flex-col ml-0 lg:ml-64 transition-all duration-300">
         <Header toggleSidebar={toggleSidebar} />
-        <main className="flex-1 p-4 overflow-y-auto ">{children}</main>
-      </div>
+        <main className=" p-4 overflow-y-auto w-full">{children}</main>
+      </div> */}
+
+      
     </div>
   );
 };

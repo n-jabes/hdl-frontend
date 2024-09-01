@@ -38,7 +38,7 @@ const rows = [
   { id: 9, lastName: 'Roxie', firstName: 'Harvey', age: 65 },
 ];
 
-export default function TableTemplate({ styles, tableHeaders, tableData, showCheckBox, showFilter  }) {
+export default function TableTemplate({ styles, tableHeaders, tableData, showCheckBox, showFilter, onRowClick   }) {
     // these styles should look like this: 'z-10  h-[70vh] lg:h-[60vh] overflow-auto border-[1px] border-gra-200 rounded'
   return (
     <div className={`${styles}`}>
@@ -50,9 +50,10 @@ export default function TableTemplate({ styles, tableHeaders, tableData, showChe
             paginationModel: { page: 0, pageSize: 5 },
           },
         }}
-        pageSizeOptions={[10, 15, 20, 5]}
+        pageSizeOptions={[5, 10, 15, 20]}
         // checkboxSelection
         checkboxSelection={showCheckBox} 
+        onRowClick={onRowClick}
         sx={{
           flexWrap: 'nowrap',
           fontFamily: 'poppins',

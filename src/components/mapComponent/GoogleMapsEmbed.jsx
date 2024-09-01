@@ -16,7 +16,7 @@ const defaultCenter = {
   lng: 30.1127, // Kigali's coordinates
 };
 
-const GoogleMapsEmbed = React.memo(({ coordinates = [] }) => {
+const GoogleMapsEmbed = React.memo(({ coordinates }) => {
   const { isLoaded } = useJsApiLoader({
     id: 'f147f16e33a7b0e0',
     googleMapsApiKey: 'AIzaSyDJOXNvQcvI8m7BdR5bc4xmDvxE_wly5Sg',
