@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { IoIosSearch } from 'react-icons/io';
 import axios from 'axios';
-import TableComponent from '../tableComponent/TableComponent';
+import TableTemplate from '../tableTemplate/TableTemplate';
 import GoogleMapsEmbed from '../mapComponent/GoogleMapsEmbed';
 
 const formatDateToYMDHM = (dateString) => {
@@ -248,7 +248,7 @@ const Home = () => {
             </button>
           </form>
         </div>
-        <TableComponent
+        <TableTemplate
           tableData={filteredData}
           isFetchingSubscribers={isFetchingSubscribers}
           onRowClick={handleRowClick}
