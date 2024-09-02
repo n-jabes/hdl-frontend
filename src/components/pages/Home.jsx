@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { IoIosSearch } from 'react-icons/io';
 import axios from 'axios';
-import TableTemplate from '../tableTemplate/TableTemplate';
+import TableComponent from '../tableComponent/TableComponent';
 import GoogleMapsEmbed from '../mapComponent/GoogleMapsEmbed';
 
 const formatDateToYMDHM = (dateString) => {
@@ -9,7 +9,7 @@ const formatDateToYMDHM = (dateString) => {
   return `${String(date.getMonth() + 1).padStart(2, '0')}/${String(
     date.getDate()
   ).padStart(2, '0')}/${date.getFullYear()} ${String(date.getHours()).padStart(
-    2,
+    '2',
     '0'
   )}:${String(date.getMinutes()).padStart(2, '0')}`;
 };
@@ -17,39 +17,39 @@ const formatDateToYMDHM = (dateString) => {
 const Home = () => {
   const [filterType, setFilterType] = useState('IMSI');
   const [filterValue, setFilterValue] = useState('');
+  const [fromDate, setFromDate] = useState('');
+  const [toDate, setToDate] = useState('');
   const [allSubscribers, setAllSubscribers] = useState([]);
-  const [formattedTableData, setFormattedTableData] = useState([]);
+  const [filteredData, setFilteredData] = useState([]);
   const [isFetchingSubscribers, setIsFetchingSubscribers] = useState(false);
   const [selectedCoordinates, setSelectedCoordinates] = useState([]);
 
   const KIGALI_COORDINATES = { lat: -1.9577, lng: 30.1127 };
 
-  const handleFilterValueChange = (event) => setFilterValue(event.target.value);
-  const handleFilterTypeChange = (event) => setFilterType(event.target.value);
+  const handleFilterValueChange = (event) => {
+    setFilterValue(event.target.value);
+  };
+
+  const handleFilterTypeChange = (event) => {
+    setFilterType(event.target.value);
+  };
+
+  const handleFromDateChange = (event) => {
+    setFromDate(event.target.value);
+  };
+
+  const handleToDateChange = (event) => {
+    setToDate(event.target.value);
+  };
 
   const GetAllSubscribers = async () => {
     setIsFetchingSubscribers(true);
     try {
       const response = await axios.get(
-        'https://hdl-backend.onrender.com/subscribers'
+        'https://hdl-backend.onrender.com/subscribers/all'
       );
       setAllSubscribers(response?.data?.data?.users);
-      const formattedData = response?.data?.data?.users.map(
-        (subscriber, index) => ({
-          id: index + 1,
-          count: index + 1,
-          startTime: formatDateToYMDHM(subscriber.startTime),
-          IMSI: subscriber.IMSI,
-          MSISDN: subscriber.MSISDN, // Keep the original MSISDN
-          maskedMSISDN: '*******', // Masked MSISDN value for display
-          IMEI: subscriber.IMEI,
-          MM: subscriber.MM,
-          R: subscriber.R,
-          Location: subscriber.Location,
-        })
-      );
-
-      setFormattedTableData(formattedData);
+      setFilteredData(response?.data?.data?.users); // Initially set filteredData to all subscribers
     } catch (error) {
       console.log('Failed to fetch subscribers', error);
     } finally {
@@ -61,8 +61,52 @@ const Home = () => {
     GetAllSubscribers();
   }, []);
 
+  const filterSubscribers = () => {
+    let filtered = allSubscribers;
+
+    if (filterValue) {
+      filtered = filtered.filter((subscriber) =>
+        subscriber[filterType].includes(filterValue)
+      );
+    }
+
+    if (fromDate) {
+      filtered = filtered.filter(
+        (subscriber) => new Date(subscriber.startTime) >= new Date(fromDate)
+      );
+    }
+
+    if (toDate) {
+      filtered = filtered.filter(
+        (subscriber) => new Date(subscriber.startTime) <= new Date(toDate)
+      );
+    }
+
+    const formattedData = filtered.map((subscriber, index) => ({
+      id: index + 1,
+      count: index + 1,
+      startTime: formatDateToYMDHM(subscriber.startTime),
+      IMSI: subscriber.IMSI,
+      MSISDN: subscriber.MSISDN,
+      maskedMSISDN: '*******',
+      IMEI: subscriber.IMEI,
+      MM: subscriber.MM,
+      R: subscriber.R,
+      Location: subscriber.Location,
+    }));
+
+    setFilteredData(formattedData);
+  };
+
+  const handleClearAll = () => {
+    setFilterValue('');
+    setFilterType('IMSI');
+    setFromDate('');
+    setToDate('');
+    setFilteredData(allSubscribers);
+  };
+
   const extractCI = (location) => {
-    console.log('location to extract: ', location);
     if (!location || location === '?') {
       console.log('Invalid location');
       return null;
@@ -71,43 +115,23 @@ const Home = () => {
     return parts[parts.length - 1];
   };
 
-  const handleRowClick = (params) => {
-    const clickedMSISDN = params.row.MSISDN;
-    console.log('Clicked row: ', clickedMSISDN);
-    const CIs = formattedTableData
-      .filter((row) => row.MSISDN === clickedMSISDN)
+  const handleRowClick = (subscriber) => {
+    const selectedMSISDN = subscriber.MSISDN;
+
+    console.log('Clicked row: ', selectedMSISDN);
+    const CIs = filteredData
+      .filter((row) => row.MSISDN === selectedMSISDN)
       .map((row) => extractCI(row.Location))
       .filter((ci) => ci !== null);
 
     console.log('CIs:', CIs);
 
-    // For now, we'll use BK Arena coordinates for all points
     const BK_ARENA_COORDINATES = { lat: -1.9441, lng: 30.0619 };
-    const coordinates = CIs.map(() => BK_ARENA_COORDINATES);
+    // const coordinates = CIs.map(() => BK_ARENA_COORDINATES);
+    const coordinates = [{ lat: -1.9441, lng: 30.0619 }, { lat: -1.9444, lng: 30.0618 }, { lat: -1.9448, lng: 30.0621 }, { lat: -1.9450, lng: 30.0616 }]
 
     setSelectedCoordinates(coordinates);
   };
-
-  const subscriberHeaders = [
-    { field: 'count', headerName: '#', minWidth: 50 },
-    { field: 'startTime', headerName: 'Time', minWidth: 150 },
-    { field: 'IMSI', headerName: 'IMSI', minWidth: 150 },
-    {
-      field: 'MSISDN',
-      headerName: 'MSISDN',
-      minWidth: 150,
-      cellClassName: 'text-blue-500 cursor-pointer',
-    },
-    { field: 'IMEI', headerName: 'IMEI', minWidth: 150 },
-    { field: 'MM', headerName: 'MM (Mobile Management State)', minWidth: 250 },
-    { field: 'R', headerName: 'R (Radio Access Type)', minWidth: 200 },
-    {
-      field: 'Location',
-      headerName: 'Location',
-      minWidth: 200,
-      cellClassName: 'text-mainBlue cursor-pointer',
-    },
-  ];
 
   return (
     <div className="h-max lg:h-full flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
@@ -117,6 +141,10 @@ const Home = () => {
           <form
             action="#"
             className="flex flex-wrap gap-2 items-end justify-between w-full"
+            onSubmit={(e) => {
+              e.preventDefault();
+              filterSubscribers();
+            }}
           >
             <div className="flex flex-col gap-[5px]">
               <label htmlFor="operator" className="text-xs">
@@ -125,7 +153,7 @@ const Home = () => {
               <select
                 name="operator"
                 id="operator"
-                className="w-max text-gray-500 text-sm py-[3px] px-2 outline-none rounded-[2px]"
+                className="w-max bg-gray-100 text-gray-700 text-xs py-[3px] px-2 outline-none rounded-[2px]"
               >
                 <option value="MTN">MTN</option>
                 <option value="Airtel">Airtel</option>
@@ -139,22 +167,26 @@ const Home = () => {
               <input
                 type="datetime-local"
                 placeholder="Start Date"
-                className="w-max text-gray-500 py-[3px] px-2 outline-none rounded-[2px] text-sm cursor-pointer"
+                value={fromDate}
+                onChange={handleFromDateChange}
+                className="w-max bg-gray-100 text-gray-700 py-[3px] px-2 outline-none rounded-[2px] text-xs cursor-pointer"
               />
             </div>
             <div className="flex flex-col gap-[5px]">
-              <label htmlFor="fromDate" className="text-xs">
+              <label htmlFor="toDate" className="text-xs">
                 To
               </label>
               <input
                 type="datetime-local"
                 placeholder="End Date"
-                className="w-max text-gray-500 py-[3px] px-2 outline-none rounded-[2px] text-sm cursor-pointer"
+                value={toDate}
+                onChange={handleToDateChange}
+                className="w-max bg-gray-100 text-gray-700 py-[3px] px-2 outline-none rounded-[2px] text-xs cursor-pointer"
               />
             </div>
             <button
               type="submit"
-              className="py-[3px] px-6 bg-mainBlue hover:bg-blue-500 text-white rounded"
+              className="py-[6px] px-6 text-xs bg-mainBlue hover:bg-blue-500 text-white rounded"
             >
               Filter
             </button>
@@ -166,6 +198,10 @@ const Home = () => {
           <form
             action="#"
             className="flex gap-2 flex-wrap items-end justify-between w-full"
+            onSubmit={(e) => {
+              e.preventDefault();
+              filterSubscribers();
+            }}
           >
             <div className="flex flex-col gap-[5px]">
               <label htmlFor="subscriber" className="text-xs">
@@ -176,7 +212,7 @@ const Home = () => {
                 id="subscriber"
                 value={filterType}
                 onChange={handleFilterTypeChange}
-                className="w-max text-gray-500 text-sm py-[3px] px-2 outline-none rounded-[2px]"
+                className="w-max bg-gray-100 text-gray-700 text-xs py-[3px] px-2 outline-none rounded-[2px]"
               >
                 <option value="IMSI">IMSI</option>
                 <option value="MSISDN">MSISDN</option>
@@ -191,40 +227,37 @@ const Home = () => {
                 value={filterValue}
                 onChange={handleFilterValueChange}
                 placeholder={`Filter by ${filterType}`}
-                className="w-full text-gray-500 py-[4px] pl-10 pr-3 outline-none rounded-[2px] text-sm"
+                className="w-full bg-gray-100 text-gray-700 py-[5px] pl-10 pr-3 outline-none rounded-[2px] text-xs"
               />
             </div>
 
             <button
-              type="submit"
-              className="py-[3px] px-6 bg-mainBlue hover:bg-blue-500 text-white rounded"
+              type="button"
+              onClick={filterSubscribers}
+              className="py-[6px] text-xs px-6 bg-mainBlue hover:bg-blue-500 text-white rounded"
             >
-              Search
+              Apply
+            </button>
+
+            <button
+              type="button"
+              onClick={handleClearAll}
+              className="py-[6px] px-6 text-xs bg-gray-600 hover:bg-gray-700 text-gray-300 rounded"
+            >
+              Clear All
             </button>
           </form>
-
-          {/* Table or Loader */}
-          <div className="mt-3 w-full">
-            {isFetchingSubscribers ? (
-              <div className="flex justify-center items-center h-[70vh] lg:h-[60vh]">
-                <div className="w-10 h-10 border-4 border-blue-500 border-t-transparent border-t-4 rounded-full animate-spin"></div>
-              </div>
-            ) : (
-              <TableTemplate
-                tableHeaders={subscriberHeaders}
-                showCheckBox={false}
-                tableData={formattedTableData}
-                styles="z-10 h-[70vh] lg:h-[60vh] overflow-auto border-[1px] border-gray-200 rounded"
-                onRowClick={handleRowClick}
-              />
-            )}
-          </div>
         </div>
+        <TableComponent
+          tableData={filteredData}
+          isFetchingSubscribers={isFetchingSubscribers}
+          onRowClick={handleRowClick}
+        />
       </div>
-      <div className="h-[70vh] lg:h-full w-full lg:w-2/5 rounded-md flex-shrink-0">
+      <div className="h-[300px] lg:h-full w-full lg:w-2/5 flex justify-center items-center">
         <GoogleMapsEmbed
           coordinates={
-            selectedCoordinates.length > 0
+            selectedCoordinates.length
               ? selectedCoordinates
               : [KIGALI_COORDINATES]
           }

@@ -45,9 +45,9 @@ const GoogleMapsEmbed = React.memo(({ coordinates }) => {
   }, [coordinates]);
 
   const singleIcon = 'http://maps.google.com/mapfiles/ms/icons/red-dot.png';
-  const startIcon = 'http://maps.google.com/mapfiles/ms/icons/green-dot.png';
+  const endIcon = 'http://maps.google.com/mapfiles/ms/icons/green-dot.png';
   const middleIcon = 'http://maps.google.com/mapfiles/ms/icons/blue-dot.png';
-  const endIcon = 'http://maps.google.com/mapfiles/ms/icons/red-dot.png';
+  const startIcon = 'http://maps.google.com/mapfiles/ms/icons/red-dot.png';
 
   return isLoaded ? (
     <GoogleMap
