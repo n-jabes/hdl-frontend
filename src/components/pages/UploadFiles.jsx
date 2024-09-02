@@ -20,16 +20,20 @@ function UploadFiles() {
     formData.append('file', file);
 
     try {
-      const response = await axios.get('https://hdl-backend.onrender.com/subscribers/upload', {
-        method: 'POST',
-        body: formData,
-      });
+      const response = await axios.post(
+        'https://hdl-backend.onrender.com/subscribers/upload',
+        formData ,
+        {
+          headers: {
+            'Content-Type': 'multipart/form-data', // axios sets this automatically for FormData
+          },
+        }
+      );
 
-      console.log('response', response)
+      console.log('response', response);
 
-      if (response.ok) {
-        const data = await response.json();
-        console.log('File uploaded successfully:', data);
+      if (response.status === 200) {
+        console.log('File uploaded successfully:', response.data);
         alert('File uploaded successfully!');
       } else {
         console.error('File upload failed:', response.statusText);
