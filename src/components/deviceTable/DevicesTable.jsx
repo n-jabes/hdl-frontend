@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
 
-export default function TableTemplate({
+export default function DevicesTable({
   styles,
   tableData,
   onRowClick,
-  isFetchingSubscribers
+  headers,
 }) {
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
@@ -69,73 +69,25 @@ export default function TableTemplate({
         <table className="min-w-full text-xs text-gray-400 text-nowrap bg-gray-800 rounded-lg ">
           <thead className="sticky top-0 bg-gray-700">
             <tr>
-              <th className="px-4 py-2 text-left font-light">#</th>
-              <th className="px-4 py-2 text-left font-light">Time</th>
-              <th className="px-4 py-2 text-left font-light">IMSI</th>
-              <th className="px-4 py-2 text-left font-light">MSISDN</th>
-              <th className="px-4 py-2 text-left font-light">IMEI</th>
-              <th className="px-4 py-2 text-left font-light">
-                R (Radio Access Type)
-              </th>
-              <th className="px-4 py-2 text-left font-light">
-                MM (Mobility management state)
-              </th>
-              <th className="px-4 py-2 text-left font-light">Location</th>
+              {headers.map((header, index) => (
+                <th key={index} className="px-4 py-2 text-left font-light">{header}</th>
+              ))}
             </tr>
           </thead>
-          {isFetchingSubscribers ? (
-            <tr>
-              <td colSpan="5" className="text-center py-10">
-                <div className="ml-[25vw] my-[15vh]">
-                  <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-gray-500"></div>
-                </div>
-              </td>
-            </tr>
-          ) : (
             <tbody>
-              {currentData.map((subscriber, index) => (
+              {currentData.map((device, index) => (
                 <tr
                   key={index}
                   className="border-b border-gray-700 hover:bg-gray-700"
                 >
-                  <td className="px-4 py-2">{subscriber.count}</td>
-                  <td className="px-4 py-2">{subscriber.startTime}</td>
-                  <td className="px-4 py-2">{subscriber.IMSI}</td>
-                  <td
-                    className="px-4 py-2 text-mainBlue cursor-pointer"
-                    onClick={() => onRowClick(subscriber)}
-                  >
-                    {'*********' || subscriber.MSISDN}
-                  </td>
-                  <td className="px-4 py-2">{subscriber.IMEI}</td>
-                  <td className="px-4 py-2">
-                    {subscriber.R === 'L'
-                      ? '4G'
-                      : subscriber.R === 'G'
-                      ? '2G'
-                      : subscriber.R === 'W'
-                      ? '3G'
-                      : 'Unknown'}
-                  </td>
-                  <td className="px-4 py-2">
-                    {subscriber.MM === 'AIR'
-                      ? 'Attached Idle Reachable'
-                      : subscriber.MM === 'AC'
-                      ? 'Attached Connected'
-                      : subscriber.MM === 'D'
-                      ? 'Disconnected'
-                      : 'Unknown'}
-                  </td>
-                  <td
-                    className="px-4 py-2 text-mainBlue cursor-pointer"
-                    onClick={() => onRowClick(subscriber)}
-                  >
-                    {subscriber.Location}
-                  </td>
+                  <td className="px-4 py-2">{device.index}</td>
+                  <td className="px-4 py-2">{device.title}</td>
+                  <td className="px-4 py-2">{device.deviceId}</td>
+                  <td className="px-4 py-2">{device.type}</td>
+                  <td className="px-4 py-2">{device.duration}</td>
                 </tr>
               ))}
             </tbody>
-          )}
         </table>
       </div>
 
