@@ -1,71 +1,204 @@
-import React, { useState } from 'react';
-import TableComponent from '../tableComponent/TableComponent';
+import React, { useState, useEffect } from 'react';
 import { IoIosSearch } from 'react-icons/io';
+import axios from 'axios';
+import TableTemplate from '../tableTemplate/TableTemplate';
+import GoogleMapsEmbed from '../mapComponent/GoogleMapsEmbed';
+
+const formatDateToYMDHM = (dateString) => {
+  const date = new Date(dateString);
+  return `${String(date.getMonth() + 1).padStart(2, '0')}/${String(
+    date.getDate()
+  ).padStart(2, '0')}/${date.getFullYear()} ${String(date.getHours()).padStart(
+    '2',
+    '0'
+  )}:${String(date.getMinutes()).padStart(2, '0')}`;
+};
 
 const TargetedSubscriber = () => {
   const [filterType, setFilterType] = useState('IMSI');
   const [filterValue, setFilterValue] = useState('');
+  const [fromDate, setFromDate] = useState('');
+  const [toDate, setToDate] = useState('');
+  const [allSubscribers, setAllSubscribers] = useState([]);
+  const [targetedSubscriber, setTargetedSubscriber] = useState('');
+  const [filteredData, setFilteredData] = useState([]);
+  const [isFetchingSubscribers, setIsFetchingSubscribers] = useState(false);
+  const [selectedCoordinates, setSelectedCoordinates] = useState([]);
+  const [errorMessage, setErrorMessage] = useState('');
 
-  const handleFilterValueChange = (event) => setFilterValue(event.target.value);
-  const handleFilterTypeChange = (event) => setFilterType(event.target.value);
+  const KIGALI_COORDINATES = { lat: -1.9577, lng: 30.1127 };
+
+  const handleFilterValueChange = (event) => {
+    setFilterValue(event.target.value);
+  };
+
+  const handleFilterTypeChange = (event) => {
+    setFilterType(event.target.value);
+  };
+
+  const handleFromDateChange = (event) => {
+    setFromDate(event.target.value);
+  };
+
+  const handleToDateChange = (event) => {
+    setToDate(event.target.value);
+  };
+
+  const getLocationDetails = async (locationCode) => {
+    const parts = locationCode.split('-');
+    const ci = parts[parts.length - 1];
+
+    try {
+      // implement logic here
+    } catch (error) {
+      console.log('Failed to get location details: ', error);
+    }
+  };
+
+  const GetAllSubscribers = async () => {
+    setIsFetchingSubscribers(true);
+    try {
+      const response = await axios.get(
+        'https://hdl-backend.onrender.com/subscribers/all'
+      );
+      setAllSubscribers(response?.data?.data?.users);
+    } catch (error) {
+      console.log('Failed to fetch subscribers', error);
+    } finally {
+      setIsFetchingSubscribers(false);
+    }
+  };
+
+  useEffect(() => {
+    GetAllSubscribers();
+  }, []);
+
+  const filterSubscribers = () => {
+    let filtered;
+
+    if (filterValue) {
+      filtered = allSubscribers.filter((subscriber) =>
+        subscriber[filterType].includes(filterValue)
+      );
+      setTargetedSubscriber(filterValue);
+    }
+
+    const formattedData = filtered.map((subscriber, index) => ({
+      id: index + 1,
+      count: index + 1,
+      startTime: formatDateToYMDHM(subscriber.startTime),
+      IMSI: subscriber.IMSI,
+      MSISDN: subscriber.MSISDN,
+      maskedMSISDN: '*******',
+      IMEI: subscriber.IMEI,
+      MM: subscriber.MM,
+      R: subscriber.R,
+      Location: subscriber.Location,
+    }));
+
+    if (formattedData.length <= 0) {
+      setErrorMessage(
+        `Subscriber with ${filterType}: ${filterValue} not found`
+      );
+      setTargetedSubscriber('');
+    } else {
+      setFilteredData(formattedData);
+      setErrorMessage(''); // Clear error message when data is found
+    }
+  };
+
+  const filterBasedOnTime = () => {
+    let filtered = filteredData;
+
+    if (filterValue) {
+      filtered = allSubscribers.filter((subscriber) =>
+        subscriber[filterType].includes(filterValue)
+      );
+      setTargetedSubscriber(filterValue);
+    }
+
+    if (fromDate) {
+      filtered = filtered.filter(
+        (subscriber) => new Date(subscriber.startTime) >= new Date(fromDate)
+      );
+    }
+
+    if (toDate) {
+      filtered = filtered.filter(
+        (subscriber) => new Date(subscriber.startTime) <= new Date(toDate)
+      );
+    }
+
+    const formattedData = filtered.map((subscriber, index) => ({
+      id: index + 1,
+      count: index + 1,
+      startTime: formatDateToYMDHM(subscriber.startTime),
+      IMSI: subscriber.IMSI,
+      MSISDN: subscriber.MSISDN,
+      maskedMSISDN: '*******',
+      IMEI: subscriber.IMEI,
+      MM: subscriber.MM,
+      R: subscriber.R,
+      Location: subscriber.Location,
+    }));
+
+    setFilteredData(formattedData);
+  };
+
+  const handleClearAll = () => {
+    setFilterValue('');
+    setFilterType('IMSI');
+    setFromDate('');
+    setToDate('');
+    setFilteredData([]);
+    setTargetedSubscriber('');
+    setErrorMessage(''); // Clear error message when clearing filters
+  };
+
+  const extractCI = (location) => {
+    if (!location || location === '?') {
+      console.log('Invalid location');
+      return null;
+    }
+    const parts = location.split('-');
+    return parts[parts.length - 1];
+  };
+
+  const handleRowClick = (subscriber) => {
+    const selectedMSISDN = subscriber.MSISDN;
+
+    console.log('Clicked row: ', selectedMSISDN);
+    const CIs = filteredData
+      .filter((row) => row.MSISDN === selectedMSISDN)
+      .map((row) => extractCI(row.Location))
+      .filter((ci) => ci !== null);
+
+    console.log('CIs:', CIs);
+
+    const BK_ARENA_COORDINATES = { lat: -1.9441, lng: 30.0619 };
+    const coordinates = [
+      { lat: -1.9441, lng: 30.0619 },
+      { lat: -1.9444, lng: 30.0618 },
+      { lat: -1.9448, lng: 30.0621 },
+      { lat: -1.945, lng: 30.0616 },
+    ];
+
+    setSelectedCoordinates(coordinates);
+  };
 
   return (
     <div className="h-max lg:h-full flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-      <div className="h-max lg:max-h-full lg:h-full w-full lg:w-3/5 flex flex-col gap-2 overflow-auto">
-        {/* operator and date filters form */}
-        <div className="flex rounded-[5px] gap-2 flex-wrap bg-[#1A1D1F] px-2 py-3">
-          <form
-            action="#"
-            className="flex flex-wrap gap-2 items-end justify-between w-full"
-          >
-            <div className="flex flex-col gap-[5px]">
-              <label htmlFor="operator" className="text-xs">
-                Operator
-              </label>
-              <select
-                name="operator"
-                id="operator"
-                className="w-max text-gray-500 text-sm py-[3px] px-2 outline-none rounded-[2px]"
-              >
-                <option value="MTN">MTN</option>
-                <option value="Airtel">Airtel</option>
-                <option value="KTRN">KTRN</option>
-              </select>
-            </div>
-            <div className="flex flex-col gap-[5px]">
-              <label htmlFor="fromDate" className="text-xs">
-                From
-              </label>
-              <input
-                type="datetime-local"
-                placeholder="Start Date"
-                className="w-max text-gray-500 py-[3px] px-2 outline-none rounded-[2px] text-sm cursor-pointer"
-              />
-            </div>
-            <div className="flex flex-col gap-[5px]">
-              <label htmlFor="fromDate" className="text-xs">
-                To
-              </label>
-              <input
-                type="datetime-local"
-                placeholder="End Date"
-                className="w-max text-gray-500 py-[3px] px-2 outline-none rounded-[2px] text-sm cursor-pointer"
-              />
-            </div>
-            <button
-              type="submit"
-              className="py-[3px] px-6 bg-mainBlue hover:bg-blue-500 text-white rounded"
-            >
-              Filter
-            </button>
-          </form>
-        </div>
+      <div className="h-max lg:max-h-full lg:h-full w-full lg:w-3/5 flex flex-col gap-2 overflow-auto flex-shrink-0">
         {/* table */}
         <div className="flex rounded-[5px] gap-2 flex-wrap bg-[#1A1D1F] px-4 py-3">
           {/* filters */}
           <form
             action="#"
             className="flex gap-2 flex-wrap items-end justify-between w-full"
+            onSubmit={(e) => {
+              e.preventDefault();
+              filterSubscribers();
+            }}
           >
             <div className="flex flex-col gap-[5px]">
               <label htmlFor="subscriber" className="text-xs">
@@ -76,7 +209,7 @@ const TargetedSubscriber = () => {
                 id="subscriber"
                 value={filterType}
                 onChange={handleFilterTypeChange}
-                className="w-max text-gray-500 text-sm py-[3px] px-2 outline-none rounded-[2px]"
+                className="w-max bg-gray-100 text-gray-700 text-xs py-[3px] px-2 outline-none rounded-[2px]"
               >
                 <option value="IMSI">IMSI</option>
                 <option value="MSISDN">MSISDN</option>
@@ -91,31 +224,128 @@ const TargetedSubscriber = () => {
                 value={filterValue}
                 onChange={handleFilterValueChange}
                 placeholder={`Filter by ${filterType}`}
-                className="w-full text-gray-500 py-[4px] pl-10 pr-3 outline-none rounded-[2px] text-sm"
+                className={`w-full bg-gray-100 text-gray-700 py-[5px] pl-10 pr-3 outline-none rounded-[2px] text-xs ${
+                  !targetedSubscriber && 'border-[2px] border-mainBlue'
+                }`}
               />
             </div>
 
             <button
-              type="submit"
-              className="py-[3px] px-6 bg-mainBlue hover:bg-blue-500 text-white rounded"
+              type="button"
+              onClick={filterSubscribers}
+              className="py-[6px] text-xs px-6 bg-mainBlue hover:bg-blue-500 text-white rounded"
             >
-              Search
+              Apply
+            </button>
+
+            <button
+              type="button"
+              onClick={handleClearAll}
+              className="py-[6px] px-6 text-xs bg-gray-600 hover:bg-gray-700 text-gray-300 rounded"
+            >
+              Clear All
             </button>
           </form>
-          {/* Table */}
-
-          <div className="mt-3 w-full">
-            <TableComponent styles="z-10  h-[70vh] lg:h-[60vh] overflow-auto border-[1px] border-gra-200 rounded" />
-          </div>
         </div>
+
+        {targetedSubscriber ? (
+          <>
+            {/* operator and date filters form */}
+            <div className="flex rounded-[5px] gap-2 flex-wrap bg-[#1A1D1F] px-2 py-3">
+              <form
+                action="#"
+                className="flex flex-wrap gap-2 items-end justify-between w-full"
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  filterBasedOnTime();
+                }}
+              >
+                <div className="flex flex-col gap-[5px]">
+                  <label htmlFor="operator" className="text-xs">
+                    Operator
+                  </label>
+                  <select
+                    name="operator"
+                    id="operator"
+                    className="w-max bg-gray-100 text-gray-700 text-xs py-[3px] px-2 outline-none rounded-[2px]"
+                  >
+                    <option value="MTN">MTN</option>
+                    <option value="AIRTEL">AIRTEL</option>
+                  </select>
+                </div>
+
+                <div className="flex flex-col gap-[5px]">
+                  <label htmlFor="from" className="text-xs">
+                    From
+                  </label>
+                  <input
+                    type="datetime-local"
+                    value={fromDate}
+                    onChange={handleFromDateChange}
+                    name="from"
+                    id="from"
+                    className="w-full bg-gray-100 text-gray-700 text-xs py-[3px] px-2 outline-none rounded-[2px]"
+                  />
+                </div>
+
+                <div className="flex flex-col gap-[5px]">
+                  <label htmlFor="to" className="text-xs">
+                    To
+                  </label>
+                  <input
+                    type="datetime-local"
+                    placeholder="End Date"
+                    value={toDate}
+                    onChange={handleToDateChange}
+                    name="to"
+                    id="to"
+                    className="w-full bg-gray-100 text-gray-700 text-xs py-[3px] px-2 outline-none rounded-[2px]"
+                  />
+                </div>
+                <button
+                  type="submit"
+                  className="py-[6px] px-6 text-xs bg-mainBlue hover:bg-blue-500 text-white rounded"
+                >
+                  Filter
+                </button>
+              </form>
+            </div>
+
+            {/* display message */}
+            <h3>
+              {errorMessage ? (
+                <span className="text-xs text-red-300 px-2">
+                  {errorMessage}
+                </span>
+              ) : (
+                <span className="text-xs text-green-300 px-2">
+                  Showing results for {filterType}: {targetedSubscriber}
+                </span>
+              )}
+            </h3>
+            <TableTemplate
+              tableData={filteredData}
+              isFetchingSubscribers={isFetchingSubscribers}
+              onRowClick={handleRowClick}
+            />
+          </>
+        ) : (
+          <h3 className="text-sm text-gray-300 px-4">
+            {errorMessage ? (
+              <span className="text-xs text-red-300">{errorMessage}</span>
+            ) : (
+              'Enter a subscriber above to filter results.'
+            )}
+          </h3>
+        )}
       </div>
-      <div className=" h-[70vh] lg:h-full w-full lg:w-2/5 rounded-md">
-        <iframe
-          title="map"
-          width="100%"
-          height="100%"
-          src="https://maps.google.com/maps?q=Kigali,%20Rwanda&t=&z=13&ie=UTF8&iwloc=&output=embed"
-          className="rounded-lg"
+      <div className="h-[300px] lg:h-full lg:min-h-[85vh] w-full lg:w-2/5 flex justify-center items-center">
+        <GoogleMapsEmbed
+          coordinates={
+            selectedCoordinates.length
+              ? selectedCoordinates
+              : [KIGALI_COORDINATES]
+          }
         />
       </div>
     </div>
