@@ -3,6 +3,7 @@ import React, { useEffect, useState } from 'react';
 import TableTemplate from '../tableTemplate/TableTemplate';
 import DevicesTable from '../deviceTable/DevicesTable';
 import { Bounce, toast } from 'react-toastify';
+import { DeviceButtons } from '../buttons/Buttons';
 
 function ManageDevices(props) {
   const [allDevices, setAllDevices] = useState([]);
@@ -19,7 +20,7 @@ function ManageDevices(props) {
         'https://hdl-backend.onrender.com/devices/all'
       );
       setAllDevices(response?.data?.data);
-      console.log('Fetched all devices: ', response?.data?.data);
+    //   console.log('Fetched all devices: ', response?.data?.data);
     } catch (error) {
       console.log('Failed to fetch all devices: ', error);
     } finally {
@@ -33,13 +34,16 @@ function ManageDevices(props) {
     'Identification Number',
     'Type',
     'Duration (days)',
+    'Actions'
   ];
   const allDevicesData = allDevices.map((device, index) => ({
-    index: index++,
+    index: ++index,
     deviceId: device.deviceId,
     title: device.title,
     type: device.deviceType,
     duration: device.duration,
+    description: device.description,
+    actions: <DeviceButtons deviceDetails={device} fetchAllDevices={fetchAllDevices} />
   }));
 
   const registerDevice = async (e) => {
@@ -206,12 +210,12 @@ function ManageDevices(props) {
                 </div>
                 <button
                   type="submit"
-                  className={`py-2 px-6 text-xs bg-mainBlue hover:bg-blue-500 text-white rounded ${
-                    isRegistering ? 'cursor-not-allowed bg-gray-600' : ''
+                  className={`py-2 px-6 text-xs  text-white rounded ${
+                    isRegistering ? 'cursor-not-allowed bg-gray-600' : 'bg-mainBlue  hover:bg-blue-500'
                   }`}
                   disabled={isRegistering}
                 >
-                  Register
+                  {isRegistering ? 'Registering...' : 'Register'}
                 </button>
               </form>
             </div>

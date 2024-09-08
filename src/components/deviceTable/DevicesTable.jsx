@@ -85,6 +85,7 @@ export default function DevicesTable({
                   <td className="px-4 py-2">{device.deviceId}</td>
                   <td className="px-4 py-2">{device.type}</td>
                   <td className="px-4 py-2">{device.duration}</td>
+                  <td className="px-4 py-2">{device.actions}</td>
                 </tr>
               ))}
             </tbody>
