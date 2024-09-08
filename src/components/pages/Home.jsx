@@ -42,6 +42,17 @@ const Home = () => {
     setToDate(event.target.value);
   };
 
+  const getLocationDetails = async (locationCode) => {
+    const parts = locationCode.split('-');
+    const ci = parts[parts.length - 1];
+
+    try {
+      
+    } catch (error) {
+      console.log('Failed to get location details: ', error)
+    }
+  }
+
   const GetAllSubscribers = async () => {
     setIsFetchingSubscribers(true);
     try {

@@ -1,6 +1,11 @@
 import React, { useState } from 'react';
 
-export default function TableComponent({ styles, tableData, onRowClick }) {
+export default function TableComponent({
+  styles,
+  tableData,
+  onRowClick,
+  isFetchingSubscribers,
+}) {
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
   const [filterText, setFilterText] = useState('');
@@ -46,11 +51,11 @@ export default function TableComponent({ styles, tableData, onRowClick }) {
   return (
     <div className={`${styles}`}>
       {/* Filter */}
-      <div className="mb-2">
+      <div className="mb-2 w-full">
         <input
           type="text"
           placeholder="Filter all columns..."
-          className="p-2 outline-none rounded bg-gray-800 border border-gray-700 text-white w-full text-xs w-1/2"
+          className="p-2 outline-none rounded bg-gray-800 border border-gray-700 text-white text-xs w-1/2"
           value={filterText}
           onChange={(e) => setFilterText(e.target.value)}
         />
@@ -78,49 +83,59 @@ export default function TableComponent({ styles, tableData, onRowClick }) {
               <th className="px-4 py-2 text-left font-light">Location</th>
             </tr>
           </thead>
-          <tbody>
-            {currentData.map((subscriber, index) => (
-              <tr
-                key={index}
-                className="border-b border-gray-700 hover:bg-gray-700"
-              >
-                <td className="px-4 py-2">{subscriber.count}</td>
-                <td className="px-4 py-2">{subscriber.startTime}</td>
-                <td className="px-4 py-2">{subscriber.IMSI}</td>
-                <td
-                  className="px-4 py-2 text-mainBlue cursor-pointer"
-                  onClick={() => onRowClick(subscriber)}
+          {isFetchingSubscribers ? (
+            <tr>
+              <td colSpan="5" className="text-center py-10">
+                <div className="ml-[25vw] my-[15vh]">
+                  <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-gray-500"></div>
+                </div>
+              </td>
+            </tr>
+          ) : (
+            <tbody>
+              {currentData.map((subscriber, index) => (
+                <tr
+                  key={index}
+                  className="border-b border-gray-700 hover:bg-gray-700"
                 >
-                  {'*********' || subscriber.MSISDN}
-                </td>
-                <td className="px-4 py-2">{subscriber.IMEI}</td>
-                <td className="px-4 py-2">
-                  {subscriber.R === 'L'
-                    ? '4G'
-                    : subscriber.R === 'G'
-                    ? '2G'
-                    : subscriber.R === 'W'
-                    ? '3G'
-                    : 'Unknown'}
-                </td>
-                <td className="px-4 py-2">
-                  {subscriber.MM === 'AIR'
-                    ? 'Attached Idle Reachable'
-                    : subscriber.MM === 'AC'
-                    ? 'Attached Connected'
-                    : subscriber.MM === 'D'
-                    ? 'Disconnected'
-                    : 'Unknown'}
-                </td>
-                <td
-                  className="px-4 py-2 text-mainBlue cursor-pointer"
-                  onClick={() => onRowClick(subscriber)}
-                >
-                  {subscriber.Location}
-                </td>
-              </tr>
-            ))}
-          </tbody>
+                  <td className="px-4 py-2">{subscriber.count}</td>
+                  <td className="px-4 py-2">{subscriber.startTime}</td>
+                  <td className="px-4 py-2">{subscriber.IMSI}</td>
+                  <td
+                    className="px-4 py-2 text-mainBlue cursor-pointer"
+                    onClick={() => onRowClick(subscriber)}
+                  >
+                    {'*********' || subscriber.MSISDN}
+                  </td>
+                  <td className="px-4 py-2">{subscriber.IMEI}</td>
+                  <td className="px-4 py-2">
+                    {subscriber.R === 'L'
+                      ? '4G'
+                      : subscriber.R === 'G'
+                      ? '2G'
+                      : subscriber.R === 'W'
+                      ? '3G'
+                      : 'Unknown'}
+                  </td>
+                  <td className="px-4 py-2">
+                    {subscriber.MM === 'AIR'
+                      ? 'Attached Idle Reachable'
+                      : subscriber.MM === 'AC'
+                      ? 'Attached Connected'
+                      : subscriber.MM === 'D'
+                      ? 'Disconnected'
+                      : 'Unknown'}
+                  </td>
+                  <td
+                    className="px-4 py-2 text-mainBlue cursor-pointer"
+                    onClick={() => onRowClick(subscriber)}
+                  >
+                    {subscriber.Location}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          )}
         </table>
       </div>
 
