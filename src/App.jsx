@@ -12,6 +12,7 @@ import EmergencyAlert from './components/pages/EmergencyAlert';
 import AddSensitiveArea from './components/pages/AddSensitiveArea';
 import ManageDevices from './components/pages/ManageDevices';
 import MonitorDevices from './components/pages/MonitorDevices';
+import MonitorSensitiveAreas from './components/pages/MonitorSensitiveAreas';
 import UploadFiles from './components/pages/UploadFiles';
 
 function App() {
@@ -99,7 +100,9 @@ function App() {
             path="/monitor-sensitive-area"
             element={
               <ProtectedRoutes isAuthenticated={isAuthenticated}>
-                <Layout>Monitor Sensitive Area</Layout>
+                <Layout>
+                  <MonitorSensitiveAreas/>
+                </Layout>
               </ProtectedRoutes>
             }
           />

@@ -1,10 +1,11 @@
+import axios from 'axios';
 import React, { useState } from 'react';
 
 export default function TableTemplate({
   styles,
   tableData,
   onRowClick,
-  isFetchingSubscribers
+  isFetchingSubscribers,
 }) {
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
@@ -48,6 +49,77 @@ export default function TableTemplate({
     setCurrentPage(1); // Reset to first page when items per page change
   };
 
+  const getLocationDetails = async (locationCode) => {
+    const parts = locationCode.split('-');
+    const ci = parts[parts.length - 1];
+
+    // Check if ci is a valid number and not a "?"
+    if (isNaN(ci) || ci === '?') {
+      // console.log('Invalid CI:', ci);
+      return {
+        CoreLocation: 'Unknown',
+        MCC: 'Unknown',
+        MNC: 'Unknown',
+        LAC: 'Unknown',
+        RAC: 'Unknown',
+        CI: 'Unknown',
+        SiteName: 'Unknown',
+        SectorLocation: 'Unknown',
+        Longitude: '0',
+        Latitude: '0',
+        Azimuth: 'Unknown',
+      };
+    }
+
+    // console.log('Valid CI: ', ci);
+
+    try {
+      const response = await axios.get(
+        `https://hdl-backend.onrender.com/core-areas/search-CI/${ci}`
+      );
+
+      // console.log('Response: ', response);
+
+      const location = response?.data?.data?.coreAreas[0]; // Assuming we want the first match
+
+      if (location) {
+        // console.log('Location: ', location);
+        return location;
+      } else {
+        return {
+          CoreLocation: 'Unknown',
+          MCC: 'Unknown',
+          MNC: 'Unknown',
+          LAC: 'Unknown',
+          RAC: 'Unknown',
+          CI: 'Unknown',
+          SiteName: 'Unknown',
+          SectorLocation: 'Unknown',
+          Longitude: '0',
+          Latitude: '0',
+          Azimuth: 'Unknown',
+        };
+      }
+    } catch (error) {
+      console.error('Error fetching location details:', error);
+
+      // Return default values in case of an error
+      return {
+        CoreLocation: 'Unknown',
+        MCC: 'Unknown',
+        MNC: 'Unknown',
+        LAC: 'Unknown',
+        RAC: 'Unknown',
+        CI: 'Unknown',
+        SiteName: 'Unknown',
+        SectorLocation: 'Unknown',
+        Longitude: '0',
+        Latitude: '0',
+        Azimuth: 'Unknown',
+      };
+    }
+  };
+
   return (
     <div className={`${styles}`}>
       {/* Filter */}
@@ -81,6 +153,11 @@ export default function TableTemplate({
                 MM (Mobility management state)
               </th>
               <th className="px-4 py-2 text-left font-light">Location</th>
+
+              <th className="px-4 py-2 text-left font-light">Site Name</th>
+              <th className="px-4 py-2 text-left font-light">
+                Sector Location
+              </th>
             </tr>
           </thead>
           {isFetchingSubscribers ? (
@@ -131,6 +208,12 @@ export default function TableTemplate({
                     onClick={() => onRowClick(subscriber)}
                   >
                     {subscriber.Location}
+                  </td>
+                  <td className="px-4 py-2 cursor-pointer">
+                    {subscriber.SiteName}
+                  </td>
+                  <td className="px-4 py-2 cursor-pointer">
+                    {subscriber.SectorLocation}
                   </td>
                 </tr>
               ))}

@@ -5,6 +5,7 @@ import {
   Polyline,
   useJsApiLoader,
 } from '@react-google-maps/api';
+import mapStyles from '../../utils/mapStyles';
 
 const containerStyle = {
   width: '100%',
@@ -53,7 +54,7 @@ const GoogleMapsEmbed = React.memo(({ coordinates }) => {
     <GoogleMap
       mapContainerStyle={containerStyle}
       onLoad={onLoad}
-      options={{ streetViewControl: false }}
+      options={{ streetViewControl: false, styles: mapStyles }}
     >
       {coordinates.length === 1 ? (
         <MarkerF position={coordinates[0]} icon={singleIcon} />

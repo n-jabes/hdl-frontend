@@ -46,12 +46,63 @@ const Home = () => {
     const parts = locationCode.split('-');
     const ci = parts[parts.length - 1];
 
-    try {
-      
-    } catch (error) {
-      console.log('Failed to get location details: ', error)
+    if (isNaN(ci) || ci === '?') {
+      return {
+        CoreLocation: 'Unknown',
+        MCC: 'Unknown',
+        MNC: 'Unknown',
+        LAC: 'Unknown',
+        RAC: 'Unknown',
+        CI: 'Unknown',
+        SiteName: 'Unknown',
+        SectorLocation: 'Unknown',
+        Longitude: '30.1127',
+        Latitude: '-1.9577',
+        Azimuth: 'Unknown',
+      };
     }
-  }
+
+    try {
+      const response = await axios.get(
+        `https://hdl-backend.onrender.com/core-areas/search-CI/${ci}`
+      );
+
+      const location = response?.data?.data?.coreAreas[0];
+
+      if (location) {
+        return location;
+      } else {
+        return {
+          CoreLocation: 'Unknown',
+          MCC: 'Unknown',
+          MNC: 'Unknown',
+          LAC: 'Unknown',
+          RAC: 'Unknown',
+          CI: 'Unknown',
+          SiteName: 'Unknown',
+          SectorLocation: 'Unknown',
+          Longitude: '30.1127',
+          Latitude: '-1.9577',
+          Azimuth: 'Unknown',
+        };
+      }
+    } catch (error) {
+      console.error('Error fetching location details:', error);
+      return {
+        CoreLocation: 'Unknown',
+        MCC: 'Unknown',
+        MNC: 'Unknown',
+        LAC: 'Unknown',
+        RAC: 'Unknown',
+        CI: 'Unknown',
+        SiteName: 'Unknown',
+        SectorLocation: 'Unknown',
+        Longitude: '30.1127',
+        Latitude: '-1.9577',
+        Azimuth: 'Unknown',
+      };
+    }
+  };
 
   const GetAllSubscribers = async () => {
     setIsFetchingSubscribers(true);
@@ -59,18 +110,36 @@ const Home = () => {
       const response = await axios.get(
         'https://hdl-backend.onrender.com/subscribers/all'
       );
-      setAllSubscribers(response?.data?.data?.users);
-      setFilteredData(response?.data?.data?.users); // Initially set filteredData to all subscribers
+      const subscribers = response?.data?.data?.users;
+
+      // Process subscribers one by one
+      for (let i = 0; i < subscribers.length; i++) {
+        const subscriber = subscribers[i];
+        const locationDetails = await getLocationDetails(subscriber.Location);
+        const enhancedSubscriber = {
+          ...subscriber,
+          SiteName: locationDetails.SiteName,
+          SectorLocation: locationDetails.SectorLocation,
+        };
+
+        // Update state with each processed subscriber
+        setAllSubscribers(prevSubscribers => [...prevSubscribers, enhancedSubscriber]);
+        setFilteredData(prevFilteredData => [...prevFilteredData, enhancedSubscriber]);
+
+        setIsFetchingSubscribers(false);
+        // Optional: Add a small delay to prevent overwhelming the API
+        await new Promise(resolve => setTimeout(resolve, 100));
+      }
+
     } catch (error) {
       console.log('Failed to fetch subscribers', error);
-    } finally {
-      setIsFetchingSubscribers(false);
-    }
+    } 
   };
 
   useEffect(() => {
     GetAllSubscribers();
   }, []);
+
 
   const filterSubscribers = () => {
     let filtered = allSubscribers;
@@ -104,6 +173,8 @@ const Home = () => {
       MM: subscriber.MM,
       R: subscriber.R,
       Location: subscriber.Location,
+      SiteName: subscriber.SiteName,
+      SectorLocation: subscriber.SectorLocation,
     }));
 
     setFilteredData(formattedData);
@@ -117,30 +188,30 @@ const Home = () => {
     setFilteredData(allSubscribers);
   };
 
-  const extractCI = (location) => {
-    if (!location || location === '?') {
-      console.log('Invalid location');
-      return null;
-    }
-    const parts = location.split('-');
-    return parts[parts.length - 1];
-  };
-
-  const handleRowClick = (subscriber) => {
+  const handleRowClick = async (subscriber) => {
     const selectedMSISDN = subscriber.MSISDN;
 
     console.log('Clicked row: ', selectedMSISDN);
-    const CIs = filteredData
+    const locations = filteredData
       .filter((row) => row.MSISDN === selectedMSISDN)
-      .map((row) => extractCI(row.Location))
-      .filter((ci) => ci !== null);
+      .map((item) => item.Location);
 
-    console.log('CIs:', CIs);
+    console.log('locations', locations);
 
-    const BK_ARENA_COORDINATES = { lat: -1.9441, lng: 30.0619 };
-    // const coordinates = CIs.map(() => BK_ARENA_COORDINATES);
-    const coordinates = [{ lat: -1.9441, lng: 30.0619 }, { lat: -1.9444, lng: 30.0618 }, { lat: -1.9448, lng: 30.0621 }, { lat: -1.9450, lng: 30.0616 }]
+    const coordinates = [];
 
+    for (const locationCode of locations) {
+      const location = await getLocationDetails(locationCode);
+      if (location) {
+        const coordinate = {
+          lat: parseFloat(location.Latitude),
+          lng: parseFloat(location.Longitude),
+        };
+        coordinates.push(coordinate);
+      }
+    }
+
+    console.log('coordinates', coordinates);
     setSelectedCoordinates(coordinates);
   };
 
