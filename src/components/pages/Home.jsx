@@ -23,6 +23,7 @@ const Home = () => {
   const [filteredData, setFilteredData] = useState([]);
   const [isFetchingSubscribers, setIsFetchingSubscribers] = useState(false);
   const [selectedCoordinates, setSelectedCoordinates] = useState([]);
+  const [isStillLoading, setIsStillLoading] = useState(false);
 
   const KIGALI_COORDINATES = { lat: -1.9577, lng: 30.1127 };
 
@@ -106,6 +107,7 @@ const Home = () => {
 
   const GetAllSubscribers = async () => {
     setIsFetchingSubscribers(true);
+    setIsStillLoading(true);
     try {
       const response = await axios.get(
         'https://hdl-backend.onrender.com/subscribers/all'
@@ -123,23 +125,39 @@ const Home = () => {
         };
 
         // Update state with each processed subscriber
-        setAllSubscribers(prevSubscribers => [...prevSubscribers, enhancedSubscriber]);
-        setFilteredData(prevFilteredData => [...prevFilteredData, enhancedSubscriber]);
+        setAllSubscribers((prevSubscribers) => [
+          ...prevSubscribers,
+          enhancedSubscriber,
+        ]);
+        setFilteredData((prevFilteredData) => [
+          ...prevFilteredData,
+          enhancedSubscriber,
+        ]);
 
         setIsFetchingSubscribers(false);
         // Optional: Add a small delay to prevent overwhelming the API
-        await new Promise(resolve => setTimeout(resolve, 100));
+        await new Promise((resolve) => setTimeout(resolve, 100));
       }
-
+      setIsStillLoading(false);
+      toast.info('Finished fetching', {
+        position: 'top-right',
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: 'dark',
+        transition: Bounce,
+      });
     } catch (error) {
       console.log('Failed to fetch subscribers', error);
-    } 
+    }
   };
 
   useEffect(() => {
     GetAllSubscribers();
   }, []);
-
 
   const filterSubscribers = () => {
     let filtered = allSubscribers;
@@ -330,6 +348,13 @@ const Home = () => {
             </button>
           </form>
         </div>
+        {isStillLoading && (
+          <div className="my-[1vh] text-center w-full">
+            <h2 className="text-mainBlue text-xs text-center maw-w-4/5">
+              still fetching ...
+            </h2>
+          </div>
+        )}
         <TableTemplate
           tableData={filteredData}
           isFetchingSubscribers={isFetchingSubscribers}

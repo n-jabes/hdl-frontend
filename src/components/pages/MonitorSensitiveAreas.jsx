@@ -24,6 +24,7 @@ function MonitorSensitiveAreas(props) {
   const [fromDate, setFromDate] = useState('');
   const [toDate, setToDate] = useState('');
   const [isFetchingSubscribers, setIsFetchingSubscribers] = useState(false);
+  const [isStillLoading, setIsStillLoading] = useState(false);
   const [selectedCoordinates, setSelectedCoordinates] = useState([]);
   const [siteBasedSubscribers, setSiteBasedSubscribers] = useState([]);
 
@@ -47,7 +48,7 @@ function MonitorSensitiveAreas(props) {
 
   useEffect(() => {
     handleFindSiteBasedSubscribers();
-  }, [siteName]);
+  }, [siteName, filteredData]);
 
   const handleFilterValueChange = (event) => {
     setFilterValue(event.target.value);
@@ -73,13 +74,24 @@ function MonitorSensitiveAreas(props) {
   };
 
   const filterSubscribers = () => {
-    let filtered;
+    let filtered = siteBasedSubscribers;
 
     if (filterValue) {
-      filtered = allSubscribers.filter((subscriber) =>
+      filtered = filtered.filter((subscriber) =>
         subscriber[filterType].includes(filterValue)
       );
-      setTargetedSubscriber(filterValue);
+    }
+
+    if (fromDate) {
+      filtered = filtered.filter(
+        (subscriber) => new Date(subscriber.startTime) >= new Date(fromDate)
+      );
+    }
+
+    if (toDate) {
+      filtered = filtered.filter(
+        (subscriber) => new Date(subscriber.startTime) <= new Date(toDate)
+      );
     }
 
     const formattedData = filtered.map((subscriber, index) => ({
@@ -88,22 +100,15 @@ function MonitorSensitiveAreas(props) {
       startTime: formatDateToYMDHM(subscriber.startTime),
       IMSI: subscriber.IMSI,
       MSISDN: subscriber.MSISDN,
-      maskedMSISDN: '*******',
       IMEI: subscriber.IMEI,
       MM: subscriber.MM,
       R: subscriber.R,
       Location: subscriber.Location,
+      SiteName: subscriber.SiteName,
+      SectorLocation: subscriber.SectorLocation,
     }));
 
-    if (formattedData.length <= 0) {
-      setErrorMessage(
-        `Subscriber with ${filterType}: ${filterValue} not found`
-      );
-      setTargetedSubscriber('');
-    } else {
-      setFilteredData(formattedData);
-      setErrorMessage(''); // Clear error message when data is found
-    }
+    setFilteredData(formattedData);
   };
 
   const handleClearAll = () => {
@@ -111,9 +116,7 @@ function MonitorSensitiveAreas(props) {
     setFilterType('IMSI');
     setFromDate('');
     setToDate('');
-    setFilteredData([]);
-    setTargetedSubscriber('');
-    setErrorMessage(''); // Clear error message when clearing filters
+    setFilteredData(siteBasedSubscribers);
   };
 
   const getLocationDetails = async (locationCode) => {
@@ -180,6 +183,7 @@ function MonitorSensitiveAreas(props) {
 
   const GetAllSubscribers = async () => {
     setIsFetchingSubscribers(true);
+    setIsStillLoading(true);
     try {
       const response = await axios.get(
         'https://hdl-backend.onrender.com/subscribers/all'
@@ -210,6 +214,18 @@ function MonitorSensitiveAreas(props) {
         // Optional: Add a small delay to prevent overwhelming the API
         await new Promise((resolve) => setTimeout(resolve, 100));
       }
+      setIsStillLoading(false);
+      toast.info('Finished fetching', {
+        position: 'top-center',
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: 'dark',
+        transition: Bounce,
+      });
     } catch (error) {
       console.log('Failed to fetch subscribers', error);
     }
@@ -246,7 +262,7 @@ function MonitorSensitiveAreas(props) {
     setSelectedCoordinates(coordinates);
   };
 
-  const sensitiveAreasHeaders = ['#','Time', 'MSISDN', 'IMSI', 'IMEI'];
+  const sensitiveAreasHeaders = ['#', 'Time', 'MSISDN', 'IMSI', 'IMEI'];
 
   return (
     <div className="min-h-[85vh] h-full w-full pb-4">
@@ -270,6 +286,7 @@ function MonitorSensitiveAreas(props) {
           Map
         </button>
       </div>
+
       {tab === 'table' ? (
         <div className="w-full">
           <form
@@ -281,7 +298,7 @@ function MonitorSensitiveAreas(props) {
             }}
           >
             <div className="flex flex-col gap-[5px]">
-              <label htmlFor="SectoLocation" className="text-xs">
+              <label htmlFor="SectoLocation" className="text-sm text-gray-400">
                 Enter Sector Location
               </label>
               <input
@@ -290,14 +307,14 @@ function MonitorSensitiveAreas(props) {
                 name="SectorLocation"
                 id="SectorLocation"
                 onChange={(e) => handleSetSectorLocation(e.target.value)}
-                className=" bg-gray-100 text-gray-700 text-xs py-3 px-3 outline-none rounded-[2px]"
+                className=" bg-gray-100 text-gray-600 text-xs py-3 px-3 outline-none rounded-[2px]"
               />
             </div>
 
             {/* only show sites when a sector location is present */}
             {sectorLocation && (
               <div className="flex flex-col gap-[5px]">
-                <label htmlFor="SiteName" className="text-xs">
+                <label htmlFor="SiteName" className="text-sm text-gray-400">
                   Choose Site
                 </label>
                 <select
@@ -319,9 +336,9 @@ function MonitorSensitiveAreas(props) {
                 </select>
               </div>
             )}
-            <button className="bg-mainBlue p-3 rounded-sm text-xs h-max">
+            {/* <button className="bg-mainBlue p-3 rounded-sm text-xs h-max">
               Search
-            </button>
+            </button> */}
           </form>
           {siteBasedSubscribers.length > 0 ? (
             <div className="h-max lg:h-full flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between ">
@@ -445,9 +462,20 @@ function MonitorSensitiveAreas(props) {
                   headers={sensitiveAreasHeaders}
                 />
               </div>
+              <div className="h-[300px] lg:h-full w-full lg:w-2/5 flex justify-center items-center">
+                {isStillLoading && (
+                  <div className="my-[15vh] flex flex-col gap-2 items-center">
+                    <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-mainBlue"></div>
+                    <h2 className="text-gray-600 text-xs w-2/3 text-center mt-4">
+                      Performing a background fetch, please wait until the fetch
+                      is done to see all data
+                    </h2>
+                  </div>
+                )}
+              </div>
             </div>
           ) : (
-            ''
+            <h2 className="text-gray-400 mt-2">Please select a location</h2>
           )}
         </div>
       ) : (
