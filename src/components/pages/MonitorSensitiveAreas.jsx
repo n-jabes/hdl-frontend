@@ -262,7 +262,7 @@ function MonitorSensitiveAreas(props) {
     setSelectedCoordinates(coordinates);
   };
 
-  const sensitiveAreasHeaders = ['#', 'Time', 'MSISDN', 'IMSI', 'IMEI'];
+  const sensitiveAreasHeaders = ['#', 'Time', 'IMSI', 'MSISDN', 'IMEI'];
 
   return (
     <div className="min-h-[85vh] h-full w-full pb-4">
@@ -465,7 +465,7 @@ function MonitorSensitiveAreas(props) {
               <div className="h-[300px] lg:h-full w-full lg:w-2/5 flex justify-center items-center">
                 {isStillLoading && (
                   <div className="my-[15vh] flex flex-col gap-2 items-center">
-                    <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-mainBlue"></div>
+                    {/* <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-mainBlue"></div> */}
                     <h2 className="text-gray-600 text-xs w-2/3 text-center mt-4">
                       Performing a background fetch, please wait until the fetch
                       is done to see all data
