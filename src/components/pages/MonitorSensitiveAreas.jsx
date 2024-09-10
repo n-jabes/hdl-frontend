@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import SensitiveAreasMap from '../mapComponent/SensitiveAreasMap';
 import TableTemplate from '../tableTemplate/TableTemplate';
-import SensitiveAreasTable from '../sensitiveAreasTable/sensitiveAreasTable';
+import SensitiveAreasTable from '../sensitiveAreasTable/SensitiveAreasTable';
 import axios from 'axios';
 
 function MonitorSensitiveAreas(props) {
@@ -35,9 +35,9 @@ function MonitorSensitiveAreas(props) {
     setSiteBasedSubscribers(subs);
   };
 
-  useEffect(()=>{
-    handleFindSiteBasedSubscribers()
-  }, [siteName])
+  useEffect(() => {
+    handleFindSiteBasedSubscribers();
+  }, [siteName]);
 
   const handleFilterValueChange = (event) => {
     setFilterValue(event.target.value);
@@ -239,7 +239,7 @@ function MonitorSensitiveAreas(props) {
   const sensitiveAreasHeaders = ['#', 'MSISDN', 'IMSI', 'IMEI'];
 
   return (
-    <div className="min-h-[85vh] h-full w-full ">
+    <div className="min-h-[85vh] h-full w-full pb-4">
       <h2 className="mb-[2px]">Monitor Sensitive Areas</h2>
 
       <div className="w-full flex flex-wrap gap-2 mb-2 border-b-[1px] border-b-gray-400">
@@ -314,7 +314,7 @@ function MonitorSensitiveAreas(props) {
             </button>
           </form>
           {siteBasedSubscribers.length > 0 ? (
-            <div className="h-max lg:h-full flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+            <div className="h-max lg:h-full flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between ">
               <div className="h-max lg:max-h-full lg:h-full w-full lg:w-3/5 flex flex-col gap-2 overflow-auto flex-shrink-0">
                 {/* operator and date filters form */}
                 <div className="flex rounded-[5px] gap-2 flex-wrap bg-[#1A1D1F] px-2 py-3">
