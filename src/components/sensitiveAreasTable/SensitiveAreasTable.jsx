@@ -80,6 +80,7 @@ export default function SensitiveAreasTable({
                   className="border-b border-gray-700 hover:bg-gray-700"
                 >
                   <td className="px-4 py-2">{subscriber.index}</td>
+                  <td className="px-4 py-2">{subscriber.startTime}</td>
                   <td className="px-4 py-2">{subscriber.MSISDN}</td>
                   <td className="px-4 py-2 text-mainBlue">{'*******' || subscriber.IMSI}</td>
                   <td className="px-4 py-2">{subscriber.IMEI}</td>

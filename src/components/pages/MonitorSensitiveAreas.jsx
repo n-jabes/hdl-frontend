@@ -1,8 +1,17 @@
 import React, { useEffect, useState } from 'react';
 import SensitiveAreasMap from '../mapComponent/SensitiveAreasMap';
-import TableTemplate from '../tableTemplate/TableTemplate';
 import SensitiveAreasTable from '../sensitiveAreasTable/SensitiveAreasTable';
 import axios from 'axios';
+
+const formatDateToYMDHM = (dateString) => {
+  const date = new Date(dateString);
+  return `${String(date.getMonth() + 1).padStart(2, '0')}/${String(
+    date.getDate()
+  ).padStart(2, '0')}/${date.getFullYear()} ${String(date.getHours()).padStart(
+    '2',
+    '0'
+  )}:${String(date.getMinutes()).padStart(2, '0')}`;
+};
 
 function MonitorSensitiveAreas(props) {
   const [tab, setTab] = useState('table');
@@ -28,6 +37,7 @@ function MonitorSensitiveAreas(props) {
         IMSI: sub.IMSI,
         MSISDN: sub.MSISDN,
         IMEI: sub.IMEI,
+        startTime: formatDateToYMDHM(sub.startTime),
         SiteName: sub.SiteName,
         SectorLocation: sub.SectorLocation,
       }));
@@ -236,7 +246,7 @@ function MonitorSensitiveAreas(props) {
     setSelectedCoordinates(coordinates);
   };
 
-  const sensitiveAreasHeaders = ['#', 'MSISDN', 'IMSI', 'IMEI'];
+  const sensitiveAreasHeaders = ['#','Time', 'MSISDN', 'IMSI', 'IMEI'];
 
   return (
     <div className="min-h-[85vh] h-full w-full pb-4">
