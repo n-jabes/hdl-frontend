@@ -17,6 +17,7 @@ export default function TableTemplate({
       value.toString().toLowerCase().includes(filterText.toLowerCase())
     )
   );
+  console.log();
 
   // Pagination logic
   const indexOfLastItem = currentPage * itemsPerPage;
@@ -47,77 +48,6 @@ export default function TableTemplate({
   const handleItemsPerPageChange = (e) => {
     setItemsPerPage(Number(e.target.value));
     setCurrentPage(1); // Reset to first page when items per page change
-  };
-
-  const getLocationDetails = async (locationCode) => {
-    const parts = locationCode.split('-');
-    const ci = parts[parts.length - 1];
-
-    // Check if ci is a valid number and not a "?"
-    if (isNaN(ci) || ci === '?') {
-      // console.log('Invalid CI:', ci);
-      return {
-        CoreLocation: 'Unknown',
-        MCC: 'Unknown',
-        MNC: 'Unknown',
-        LAC: 'Unknown',
-        RAC: 'Unknown',
-        CI: 'Unknown',
-        SiteName: 'Unknown',
-        SectorLocation: 'Unknown',
-        Longitude: '0',
-        Latitude: '0',
-        Azimuth: 'Unknown',
-      };
-    }
-
-    // console.log('Valid CI: ', ci);
-
-    try {
-      const response = await axios.get(
-        `https://hdl-backend.onrender.com/core-areas/search-CI/${ci}`
-      );
-
-      // console.log('Response: ', response);
-
-      const location = response?.data?.data?.coreAreas[0]; // Assuming we want the first match
-
-      if (location) {
-        // console.log('Location: ', location);
-        return location;
-      } else {
-        return {
-          CoreLocation: 'Unknown',
-          MCC: 'Unknown',
-          MNC: 'Unknown',
-          LAC: 'Unknown',
-          RAC: 'Unknown',
-          CI: 'Unknown',
-          SiteName: 'Unknown',
-          SectorLocation: 'Unknown',
-          Longitude: '0',
-          Latitude: '0',
-          Azimuth: 'Unknown',
-        };
-      }
-    } catch (error) {
-      console.error('Error fetching location details:', error);
-
-      // Return default values in case of an error
-      return {
-        CoreLocation: 'Unknown',
-        MCC: 'Unknown',
-        MNC: 'Unknown',
-        LAC: 'Unknown',
-        RAC: 'Unknown',
-        CI: 'Unknown',
-        SiteName: 'Unknown',
-        SectorLocation: 'Unknown',
-        Longitude: '0',
-        Latitude: '0',
-        Azimuth: 'Unknown',
-      };
-    }
   };
 
   return (
@@ -175,7 +105,7 @@ export default function TableTemplate({
                   key={index}
                   className="border-b border-gray-700 hover:bg-gray-700"
                 >
-                  <td className="px-4 py-2">{subscriber.count}</td>
+                  <td className="px-4 py-2">{++index}</td>
                   <td className="px-4 py-2">{subscriber.startTime}</td>
                   <td className="px-4 py-2">{subscriber.IMSI}</td>
                   <td
