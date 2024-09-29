@@ -69,6 +69,7 @@ function MonitorSensitiveAreas(props) {
   const handleSetSectorLocation = (value) => {
     setSectorLocation(value);
   };
+  
   const handleSetSiteName = (value) => {
     setSiteName(value);
   };
