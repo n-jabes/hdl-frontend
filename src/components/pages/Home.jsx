@@ -3,6 +3,7 @@ import { IoIosSearch } from 'react-icons/io';
 import axios from 'axios';
 import TableTemplate from '../tableTemplate/TableTemplate';
 import GoogleMapsEmbed from '../mapComponent/GoogleMapsEmbed';
+import { Bounce, toast } from 'react-toastify';
 
 const formatDateToYMDHM = (dateString) => {
   const date = new Date(dateString);
@@ -20,7 +21,7 @@ const Home = () => {
   const [fromDate, setFromDate] = useState('');
   const [toDate, setToDate] = useState('');
   const [allSubscribers, setAllSubscribers] = useState([]);
-  const [filteredData, setFilteredData] = useState([]);
+  const [filteredData, setFilteredData] = useState(allSubscribers);
   const [isFetchingSubscribers, setIsFetchingSubscribers] = useState(false);
   const [selectedCoordinates, setSelectedCoordinates] = useState([]);
   const [isStillLoading, setIsStillLoading] = useState(false);
@@ -105,44 +106,40 @@ const Home = () => {
     }
   };
 
+  
   const GetAllSubscribers = async () => {
     setIsFetchingSubscribers(true);
     setIsStillLoading(true);
     try {
       const response = await axios.get(
-        'https://hdl-backend.onrender.com/subscribers/all'
+        'https://hdl-backend.onrender.com/subscribers/subscriber-location'
       );
-      const subscribers = response?.data?.data?.users;
-      
+      const subscribers = response?.data?.data?.subscribers;
+      // console.log('subs: ', subscribers);
 
-      // Process subscribers one by one
-      for (let i = 0; i < subscribers.length; i++) {
-        const subscriber = subscribers[i];
-        const locationDetails = await getLocationDetails(subscriber.Location);
-        const enhancedSubscriber = {
-          ...subscriber,
-          SiteName: locationDetails.SiteName,
-          SectorLocation: locationDetails.SectorLocation,
-        };
+      const formattedData = subscribers.map((subscriber, index) => ({
+        id: index + 1,
+        count: index + 1,
+        startTime: formatDateToYMDHM(subscriber.startTime),
+        IMSI: subscriber.IMSI,
+        MSISDN: subscriber.MSISDN,
+        maskedMSISDN: '*******',
+        IMEI: subscriber.IMEI,
+        MM: subscriber.MM,
+        R: subscriber.R,
+        Location: subscriber.Location,
+        SiteName: subscriber?.matchingCoreArea?.SiteName,
+        SectorLocation: subscriber?.matchingCoreArea?.SectorLocation,
+      }));
 
-        // Update state with each processed subscriber
-        setAllSubscribers((prevSubscribers) => [
-          ...prevSubscribers,
-          enhancedSubscriber,
-        ]);
-        setFilteredData((prevFilteredData) => [
-          ...prevFilteredData,
-          enhancedSubscriber,
-        ]);
-
-        setIsFetchingSubscribers(false);
-        // Optional: Add a small delay to prevent overwhelming the API
-        await new Promise((resolve) => setTimeout(resolve, 100));
-      }
+      setAllSubscribers(formattedData);
+      setFilteredData(formattedData);
+      setIsFetchingSubscribers(false);
       setIsStillLoading(false);
+
       toast.info('Finished fetching', {
         position: 'top-right',
-        autoClose: 5000,
+        autoClose: 1000,
         hideProgressBar: false,
         closeOnClick: true,
         pauseOnHover: true,
@@ -162,6 +159,7 @@ const Home = () => {
 
   const filterSubscribers = () => {
     let filtered = allSubscribers;
+    console.log('Filtered initial: ', filtered);
 
     if (filterValue) {
       filtered = filtered.filter((subscriber) =>
@@ -181,22 +179,9 @@ const Home = () => {
       );
     }
 
-    const formattedData = filtered.map((subscriber, index) => ({
-      id: index + 1,
-      count: index + 1,
-      startTime: formatDateToYMDHM(subscriber.startTime),
-      IMSI: subscriber.IMSI,
-      MSISDN: subscriber.MSISDN,
-      maskedMSISDN: '*******',
-      IMEI: subscriber.IMEI,
-      MM: subscriber.MM,
-      R: subscriber.R,
-      Location: subscriber.Location,
-      SiteName: subscriber.SiteName,
-      SectorLocation: subscriber.SectorLocation,
-    }));
+    console.log('Filtered: ', filtered);
 
-    setFilteredData(formattedData);
+    setFilteredData(filtered);
   };
 
   const handleClearAll = () => {
@@ -210,7 +195,7 @@ const Home = () => {
   const handleRowClick = async (subscriber) => {
     const selectedMSISDN = subscriber.MSISDN;
 
-    console.log('Clicked row: ', selectedMSISDN);
+    // console.log('Clicked row: ', selectedMSISDN);
     const locations = filteredData
       .filter((row) => row.MSISDN === selectedMSISDN)
       .map((item) => item.Location);

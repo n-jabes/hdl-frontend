@@ -11,6 +11,8 @@ export default function TableTemplate({
   const [itemsPerPage, setItemsPerPage] = useState(10);
   const [filterText, setFilterText] = useState('');
 
+  // console.log("tableData: ", tableData)
+
   // Filter data based on input text
   const filteredData = tableData.filter((item) =>
     Object.values(item).some((value) =>

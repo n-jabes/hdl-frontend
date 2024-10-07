@@ -3,6 +3,7 @@ import { IoIosSearch } from 'react-icons/io';
 import axios from 'axios';
 import TableTemplate from '../tableTemplate/TableTemplate';
 import GoogleMapsEmbed from '../mapComponent/GoogleMapsEmbed';
+import { Bounce, toast } from 'react-toastify';
 
 const formatDateToYMDHM = (dateString) => {
   const date = new Date(dateString);
@@ -23,6 +24,7 @@ const MassiveSubscribers = () => {
   const [filteredData, setFilteredData] = useState([]);
   const [isFetchingSubscribers, setIsFetchingSubscribers] = useState(false);
   const [selectedCoordinates, setSelectedCoordinates] = useState([]);
+  const [isStillLoading, setIsStillLoading] = useState(false);
 
   const KIGALI_COORDINATES = { lat: -1.9577, lng: 30.1127 };
 
@@ -46,25 +48,107 @@ const MassiveSubscribers = () => {
     const parts = locationCode.split('-');
     const ci = parts[parts.length - 1];
 
-    try {
-      
-    } catch (error) {
-      console.log('Failed to get location details: ', error)
+    if (isNaN(ci) || ci === '?') {
+      return {
+        CoreLocation: 'Unknown',
+        MCC: 'Unknown',
+        MNC: 'Unknown',
+        LAC: 'Unknown',
+        RAC: 'Unknown',
+        CI: 'Unknown',
+        SiteName: 'Unknown',
+        SectorLocation: 'Unknown',
+        Longitude: '30.1127',
+        Latitude: '-1.9577',
+        Azimuth: 'Unknown',
+      };
     }
-  }
+
+    try {
+      const response = await axios.get(
+        `https://hdl-backend.onrender.com/core-areas/search-CI/${ci}`
+      );
+
+      const location = response?.data?.data?.coreAreas[0];
+
+      if (location) {
+        return location;
+      } else {
+        return {
+          CoreLocation: 'Unknown',
+          MCC: 'Unknown',
+          MNC: 'Unknown',
+          LAC: 'Unknown',
+          RAC: 'Unknown',
+          CI: 'Unknown',
+          SiteName: 'Unknown',
+          SectorLocation: 'Unknown',
+          Longitude: '30.1127',
+          Latitude: '-1.9577',
+          Azimuth: 'Unknown',
+        };
+      }
+    } catch (error) {
+      console.error('Error fetching location details:', error);
+      return {
+        CoreLocation: 'Unknown',
+        MCC: 'Unknown',
+        MNC: 'Unknown',
+        LAC: 'Unknown',
+        RAC: 'Unknown',
+        CI: 'Unknown',
+        SiteName: 'Unknown',
+        SectorLocation: 'Unknown',
+        Longitude: '30.1127',
+        Latitude: '-1.9577',
+        Azimuth: 'Unknown',
+      };
+    }
+  };
 
   const GetAllSubscribers = async () => {
     setIsFetchingSubscribers(true);
+    setIsStillLoading(true);
     try {
       const response = await axios.get(
-        'https://hdl-backend.onrender.com/subscribers/all'
+        'https://hdl-backend.onrender.com/subscribers/subscriber-location'
       );
-      setAllSubscribers(response?.data?.data?.users);
-      setFilteredData(response?.data?.data?.users); // Initially set filteredData to all subscribers
+      const subscribers = response?.data?.data?.subscribers;
+      // console.log('subs: ', subscribers);
+
+      const formattedData = subscribers.map((subscriber, index) => ({
+        id: index + 1,
+        count: index + 1,
+        startTime: formatDateToYMDHM(subscriber.startTime),
+        IMSI: subscriber.IMSI,
+        MSISDN: subscriber.MSISDN,
+        maskedMSISDN: '*******',
+        IMEI: subscriber.IMEI,
+        MM: subscriber.MM,
+        R: subscriber.R,
+        Location: subscriber.Location,
+        SiteName: subscriber?.matchingCoreArea?.SiteName,
+        SectorLocation: subscriber?.matchingCoreArea?.SectorLocation,
+      }));
+
+      setAllSubscribers(formattedData);
+      setFilteredData(formattedData);
+      setIsFetchingSubscribers(false);
+      setIsStillLoading(false);
+
+      toast.info('Finished fetching', {
+        position: 'top-right',
+        autoClose: 1000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: 'dark',
+        transition: Bounce,
+      });
     } catch (error) {
       console.log('Failed to fetch subscribers', error);
-    } finally {
-      setIsFetchingSubscribers(false);
     }
   };
 
@@ -74,6 +158,7 @@ const MassiveSubscribers = () => {
 
   const filterSubscribers = () => {
     let filtered = allSubscribers;
+    console.log('Filtered initial: ', filtered);
 
     if (filterValue) {
       filtered = filtered.filter((subscriber) =>
@@ -93,20 +178,9 @@ const MassiveSubscribers = () => {
       );
     }
 
-    const formattedData = filtered.map((subscriber, index) => ({
-      id: index + 1,
-      count: index + 1,
-      startTime: formatDateToYMDHM(subscriber.startTime),
-      IMSI: subscriber.IMSI,
-      MSISDN: subscriber.MSISDN,
-      maskedMSISDN: '*******',
-      IMEI: subscriber.IMEI,
-      MM: subscriber.MM,
-      R: subscriber.R,
-      Location: subscriber.Location,
-    }));
+    console.log('Filtered: ', filtered);
 
-    setFilteredData(formattedData);
+    setFilteredData(filtered);
   };
 
   const handleClearAll = () => {
@@ -139,7 +213,12 @@ const MassiveSubscribers = () => {
 
     const BK_ARENA_COORDINATES = { lat: -1.9441, lng: 30.0619 };
     // const coordinates = CIs.map(() => BK_ARENA_COORDINATES);
-    const coordinates = [{ lat: -1.9441, lng: 30.0619 }, { lat: -1.9444, lng: 30.0618 }, { lat: -1.9448, lng: 30.0621 }, { lat: -1.9450, lng: 30.0616 }]
+    const coordinates = [
+      { lat: -1.9441, lng: 30.0619 },
+      { lat: -1.9444, lng: 30.0618 },
+      { lat: -1.9448, lng: 30.0621 },
+      { lat: -1.945, lng: 30.0616 },
+    ];
 
     setSelectedCoordinates(coordinates);
   };
@@ -259,6 +338,13 @@ const MassiveSubscribers = () => {
             </button>
           </form>
         </div>
+        {isStillLoading && (
+          <div className="my-[1vh] text-center w-full">
+            <h2 className="text-mainBlue text-xs text-center maw-w-4/5">
+              still fetching ...
+            </h2>
+          </div>
+        )}
         <TableTemplate
           tableData={filteredData}
           isFetchingSubscribers={isFetchingSubscribers}

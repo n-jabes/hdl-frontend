@@ -23,6 +23,7 @@ const TargetedSubscriber = () => {
   const [targetedSubscriber, setTargetedSubscriber] = useState('');
   const [filteredData, setFilteredData] = useState([]);
   const [isFetchingSubscribers, setIsFetchingSubscribers] = useState(false);
+  const [isStillLoading, setIsStillLoading] = useState(false);
   const [selectedCoordinates, setSelectedCoordinates] = useState([]);
   const [errorMessage, setErrorMessage] = useState('');
 
@@ -57,15 +58,17 @@ const TargetedSubscriber = () => {
 
   const GetAllSubscribers = async () => {
     setIsFetchingSubscribers(true);
+    setIsStillLoading(true);
     try {
       const response = await axios.get(
-        'https://hdl-backend.onrender.com/subscribers/all'
+        'https://hdl-backend.onrender.com/subscribers/subscriber-location'
       );
-      setAllSubscribers(response?.data?.data?.users);
+      setAllSubscribers(response?.data?.data?.subscribers);
     } catch (error) {
       console.log('Failed to fetch subscribers', error);
     } finally {
       setIsFetchingSubscribers(false);
+      setIsStillLoading(false);
     }
   };
 
@@ -74,36 +77,43 @@ const TargetedSubscriber = () => {
   }, []);
 
   const filterSubscribers = () => {
-    let filtered;
-
-    if (filterValue) {
-      filtered = allSubscribers.filter((subscriber) =>
-        subscriber[filterType].includes(filterValue)
+    //avoid sending error messages when the system is still loading all subscribers
+    if (isStillLoading) {
+      alert(
+        "We are still retriving all subscribers, please click 'Apply' again!"
       );
-      setTargetedSubscriber(filterValue);
-    }
-
-    const formattedData = filtered.map((subscriber, index) => ({
-      id: index + 1,
-      count: index + 1,
-      startTime: formatDateToYMDHM(subscriber.startTime),
-      IMSI: subscriber.IMSI,
-      MSISDN: subscriber.MSISDN,
-      maskedMSISDN: '*******',
-      IMEI: subscriber.IMEI,
-      MM: subscriber.MM,
-      R: subscriber.R,
-      Location: subscriber.Location,
-    }));
-
-    if (formattedData.length <= 0) {
-      setErrorMessage(
-        `Subscriber with ${filterType}: ${filterValue} not found`
-      );
-      setTargetedSubscriber('');
     } else {
-      setFilteredData(formattedData);
-      setErrorMessage(''); // Clear error message when data is found
+      let filtered;
+
+      if (filterValue) {
+        filtered = allSubscribers.filter((subscriber) =>
+          subscriber[filterType].includes(filterValue)
+        );
+        setTargetedSubscriber(filterValue);
+      }
+
+      const formattedData = filtered.map((subscriber, index) => ({
+        id: index + 1,
+        count: index + 1,
+        startTime: formatDateToYMDHM(subscriber.startTime),
+        IMSI: subscriber.IMSI,
+        MSISDN: subscriber.MSISDN,
+        maskedMSISDN: '*******',
+        IMEI: subscriber.IMEI,
+        MM: subscriber.MM,
+        R: subscriber.R,
+        Location: subscriber.Location,
+      }));
+
+      if (formattedData.length <= 0) {
+        setErrorMessage(
+          `Subscriber with ${filterType}: ${filterValue} not found`
+        );
+        setTargetedSubscriber('');
+      } else {
+        setFilteredData(formattedData);
+        setErrorMessage(''); // Clear error message when data is found
+      }
     }
   };
 

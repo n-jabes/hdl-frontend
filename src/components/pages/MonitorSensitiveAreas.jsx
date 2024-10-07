@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import SensitiveAreasMap from '../mapComponent/SensitiveAreasMap';
 import SensitiveAreasTable from '../sensitiveAreasTable/SensitiveAreasTable';
 import axios from 'axios';
+import { Bounce, toast } from 'react-toastify';
 
 const formatDateToYMDHM = (dateString) => {
   const date = new Date(dateString);
@@ -18,7 +19,7 @@ function MonitorSensitiveAreas(props) {
   const [sectorLocation, setSectorLocation] = useState('');
   const [siteName, setSiteName] = useState('');
   const [allSubscribers, setAllSubscribers] = useState([]);
-  const [filteredData, setFilteredData] = useState([]);
+  const [filteredData, setFilteredData] = useState(allSubscribers);
   const [filterType, setFilterType] = useState('IMSI');
   const [filterValue, setFilterValue] = useState('');
   const [fromDate, setFromDate] = useState('');
@@ -69,7 +70,7 @@ function MonitorSensitiveAreas(props) {
   const handleSetSectorLocation = (value) => {
     setSectorLocation(value);
   };
-  
+
   const handleSetSiteName = (value) => {
     setSiteName(value);
   };
@@ -187,46 +188,35 @@ function MonitorSensitiveAreas(props) {
     setIsStillLoading(true);
     try {
       const response = await axios.get(
-        'https://hdl-backend.onrender.com/subscribers/all'
+        'https://hdl-backend.onrender.com/subscribers/subscriber-location'
       );
-      const subscribers = response?.data?.data?.users;
+      const subscribers = response?.data?.data?.subscribers;
 
-      // Process subscribers one by one
-      for (let i = 0; i < subscribers.length; i++) {
-        const subscriber = subscribers[i];
-        const locationDetails = await getLocationDetails(subscriber.Location);
-        const enhancedSubscriber = {
-          ...subscriber,
-          SiteName: locationDetails.SiteName,
-          SectorLocation: locationDetails.SectorLocation,
-        };
+      console.log('Subscribers', subscribers);
 
-        // Update state with each processed subscriber
-        setAllSubscribers((prevSubscribers) => [
-          ...prevSubscribers,
-          enhancedSubscriber,
-        ]);
-        setFilteredData((prevFilteredData) => [
-          ...prevFilteredData,
-          enhancedSubscriber,
-        ]);
+      const formattedData = subscribers.map((subscriber, index) => ({
+        id: index + 1,
+        count: index + 1,
+        startTime: formatDateToYMDHM(subscriber.startTime),
+        IMSI: subscriber.IMSI,
+        MSISDN: subscriber.MSISDN,
+        maskedMSISDN: '*******',
+        IMEI: subscriber.IMEI,
+        MM: subscriber.MM,
+        R: subscriber.R,
+        Location: subscriber.Location,
+        SiteName: subscriber?.matchingCoreArea?.SiteName,
+        SectorLocation: subscriber?.matchingCoreArea?.SectorLocation,
+      }));
 
-        setIsFetchingSubscribers(false);
-        // Optional: Add a small delay to prevent overwhelming the API
-        await new Promise((resolve) => setTimeout(resolve, 100));
-      }
+      setAllSubscribers(formattedData);
+      setFilteredData(formattedData);
+
+      setIsFetchingSubscribers(false);
+      // Optional: Add a small delay to prevent overwhelming the API
+      await new Promise((resolve) => setTimeout(resolve, 100));
+
       setIsStillLoading(false);
-      toast.info('Finished fetching', {
-        position: 'top-center',
-        autoClose: 5000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-        theme: 'dark',
-        transition: Bounce,
-      });
     } catch (error) {
       console.log('Failed to fetch subscribers', error);
     }
