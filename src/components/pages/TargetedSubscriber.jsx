@@ -3,6 +3,7 @@ import { IoIosSearch } from 'react-icons/io';
 import axios from 'axios';
 import TableTemplate from '../tableTemplate/TableTemplate';
 import GoogleMapsEmbed from '../mapComponent/GoogleMapsEmbed';
+import { Bounce, toast } from 'react-toastify';
 
 const formatDateToYMDHM = (dateString) => {
   const date = new Date(dateString);
@@ -76,7 +77,7 @@ const TargetedSubscriber = () => {
     GetAllSubscribers();
   }, []);
 
-  const filterSubscribers = () => {
+  const filterSubscribers = async () => {
     //avoid sending error messages when the system is still loading all subscribers
     if (isStillLoading) {
       alert(
@@ -86,9 +87,64 @@ const TargetedSubscriber = () => {
       let filtered;
 
       if (filterValue) {
-        filtered = allSubscribers.filter((subscriber) =>
-          subscriber[filterType].includes(filterValue)
-        );
+        setIsFetchingSubscribers(true);
+        try {
+          const response = await axios.get(
+            `https://hdl-backend.onrender.com/subscribers/subscriber-filter/${filterType}/${filterValue}`
+          );
+  
+          // console.log('response: ', response?.data?.data?.subscribers);
+  
+          filtered = response?.data?.data?.subscribers.map(
+            (subscriber, index) => ({
+              id: index + 1,
+              count: index + 1,
+              startTime: formatDateToYMDHM(subscriber.startTime),
+              IMSI: subscriber.IMSI,
+              MSISDN: subscriber.MSISDN,
+              maskedMSISDN: '*******',
+              IMEI: subscriber.IMEI,
+              MM: subscriber.MM,
+              R: subscriber.R,
+              Location: subscriber.Location,
+              SiteName: subscriber?.matchingCoreArea?.SiteName,
+              SectorLocation: subscriber?.matchingCoreArea?.SectorLocation,
+            })
+          );
+  
+          if (response?.data?.data.subscribers.length < 1) {
+            // setError(`No results for subscriber with ${filterType} = ${filterValue}`)
+            toast.info(
+              `No results for subscriber with ${filterType} = ${filterValue}`,
+              {
+                position: 'top-right',
+                autoClose: 2500,
+                hideProgressBar: false,
+                closeOnClick: true,
+                pauseOnHover: true,
+                draggable: true,
+                progress: undefined,
+                theme: 'light',
+                transition: Bounce,
+              }
+            );
+          }
+        } catch (error) {
+          console.log('error: ', error);
+          toast.error(error?.message, {
+            position: 'top-right',
+            autoClose: 1000,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+            progress: undefined,
+            theme: 'dark',
+            transition: Bounce,
+          });
+        } finally {
+          setIsFetchingSubscribers(false);
+        }
         setTargetedSubscriber(filterValue);
       }
 

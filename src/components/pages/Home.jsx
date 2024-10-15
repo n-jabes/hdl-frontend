@@ -25,6 +25,7 @@ const Home = () => {
   const [isFetchingSubscribers, setIsFetchingSubscribers] = useState(false);
   const [selectedCoordinates, setSelectedCoordinates] = useState([]);
   const [isStillLoading, setIsStillLoading] = useState(false);
+  const [error, setError] = useState('');
 
   const KIGALI_COORDINATES = { lat: -1.9577, lng: 30.1127 };
 
@@ -106,7 +107,6 @@ const Home = () => {
     }
   };
 
-  
   const GetAllSubscribers = async () => {
     setIsFetchingSubscribers(true);
     setIsStillLoading(true);
@@ -136,10 +136,11 @@ const Home = () => {
       setFilteredData(formattedData);
       setIsFetchingSubscribers(false);
       setIsStillLoading(false);
-
-      toast.info('Finished fetching', {
+    } catch (error) {
+      console.log('Failed to fetch subscribers', error);
+      toast.info('Failed to fetch subscribers', {
         position: 'top-right',
-        autoClose: 1000,
+        autoClose: 2000,
         hideProgressBar: false,
         closeOnClick: true,
         pauseOnHover: true,
@@ -148,8 +149,6 @@ const Home = () => {
         theme: 'dark',
         transition: Bounce,
       });
-    } catch (error) {
-      console.log('Failed to fetch subscribers', error);
     }
   };
 
@@ -157,29 +156,101 @@ const Home = () => {
     GetAllSubscribers();
   }, []);
 
-  const filterSubscribers = () => {
+  const filterSubscribers = async () => {
     let filtered = allSubscribers;
-    console.log('Filtered initial: ', filtered);
+    // console.log('Filtered initial: ', filtered);
 
     if (filterValue) {
-      filtered = filtered.filter((subscriber) =>
-        subscriber[filterType].includes(filterValue)
-      );
+      setIsFetchingSubscribers(true);
+      try {
+        const response = await axios.get(
+          `https://hdl-backend.onrender.com/subscribers/subscriber-filter/${filterType}/${filterValue}`
+        );
+
+        // console.log('response: ', response?.data?.data?.subscribers);
+
+        filtered = response?.data?.data?.subscribers.map(
+          (subscriber, index) => ({
+            id: index + 1,
+            count: index + 1,
+            startTime: formatDateToYMDHM(subscriber.startTime),
+            IMSI: subscriber.IMSI,
+            MSISDN: subscriber.MSISDN,
+            maskedMSISDN: '*******',
+            IMEI: subscriber.IMEI,
+            MM: subscriber.MM,
+            R: subscriber.R,
+            Location: subscriber.Location,
+            SiteName: subscriber?.matchingCoreArea?.SiteName,
+            SectorLocation: subscriber?.matchingCoreArea?.SectorLocation,
+          })
+        );
+
+        if (response?.data?.data.subscribers.length < 1) {
+          // setError(`No results for subscriber with ${filterType} = ${filterValue}`)
+          toast.info(
+            `No results for subscriber with ${filterType} = ${filterValue}`,
+            {
+              position: 'top-right',
+              autoClose: 2500,
+              hideProgressBar: false,
+              closeOnClick: true,
+              pauseOnHover: true,
+              draggable: true,
+              progress: undefined,
+              theme: 'light',
+              transition: Bounce,
+            }
+          );
+        }
+      } catch (error) {
+        console.log('error: ', error);
+        toast.error(error?.message, {
+          position: 'top-right',
+          autoClose: 1000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          theme: 'dark',
+          transition: Bounce,
+        });
+      } finally {
+        setIsFetchingSubscribers(false);
+      }
     }
 
     if (fromDate) {
+      console.log("From date: ", fromDate)
+      const formattedFromDate = formatDateToYMDHM(fromDate)
+      console.log("From date: ", formattedFromDate)
       filtered = filtered.filter(
         (subscriber) => new Date(subscriber.startTime) >= new Date(fromDate)
       );
     }
 
     if (toDate) {
+      console.log("To date: ", toDate)
+      const formattedToDate = formatDateToYMDHM(toDate)
+      console.log("To date: ", formattedToDate)
       filtered = filtered.filter(
         (subscriber) => new Date(subscriber.startTime) <= new Date(toDate)
       );
     }
 
-    console.log('Filtered: ', filtered);
+    // if(fromDate && toDate){
+    //   console.log("From date: ", fromDate)
+    //   const formattedFromDate = formatDateToYMDHM(fromDate)
+    //   const formattedToDate = formatDateToYMDHM(toDate)
+    //   console.log("To date: ", formattedToDate)
+
+    //   const response = await axios.get(`https://hdl-backend.onrender.com/subscribers/filter-by-time/${formattedFromDate}/${formattedToDate}`)
+
+    //   console.log('response: ', response)
+    // }
+
+    // console.log('Filtered: ', filtered);
 
     setFilteredData(filtered);
   };
@@ -341,11 +412,15 @@ const Home = () => {
             </h2>
           </div>
         )}
-        <TableTemplate
-          tableData={filteredData}
-          isFetchingSubscribers={isFetchingSubscribers}
-          onRowClick={handleRowClick}
-        />
+        {error ? (
+          <h2>{error}</h2>
+        ) : (
+          <TableTemplate
+            tableData={filteredData}
+            isFetchingSubscribers={isFetchingSubscribers}
+            onRowClick={handleRowClick}
+          />
+        )}
       </div>
       <div className="h-[300px] lg:h-full w-full lg:w-2/5 flex justify-center items-center">
         <GoogleMapsEmbed
