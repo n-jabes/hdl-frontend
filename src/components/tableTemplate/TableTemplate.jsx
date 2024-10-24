@@ -11,15 +11,27 @@ export default function TableTemplate({
   const [itemsPerPage, setItemsPerPage] = useState(10);
   const [filterText, setFilterText] = useState('');
 
-  // console.log("tableData: ", tableData)
-
-  // Filter data based on input text
-  const filteredData = tableData.filter((item) =>
-    Object.values(item).some((value) =>
-      value.toString().toLowerCase().includes(filterText.toLowerCase())
-    )
-  );
-  console.log();
+  // Define the fields you want to filter on
+  const filterFields = ['IMSI', 'IMEI', 'MSISDN']; 
+  
+  const filteredData = tableData.filter((item) => {
+    // Trim and lowercase filter text to handle unnecessary spaces and case-insensitive search
+    const searchText = filterText.trim().toLowerCase();
+  
+    // If there's no filter text, return all data
+    if (!searchText) return true;
+  
+    // Loop through only the specified fields and see if any field contains the filter text
+    return filterFields.some((field) => {
+      // Check if the field exists in the item and if it's a valid string or number
+      const fieldValue = item[field];
+      if (typeof fieldValue === 'string' || typeof fieldValue === 'number') {
+        return fieldValue.toString().toLowerCase().includes(searchText);
+      }
+      return false; // Skip non-string/number fields
+    });
+  });
+  
 
   // Pagination logic
   const indexOfLastItem = currentPage * itemsPerPage;

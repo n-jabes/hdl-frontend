@@ -54,7 +54,7 @@ const EmergencyAlert = () => {
         {/* Table */}
 
         <div className="mt-3 w-full">
-          <TableComponent styles="z-10  h-[70vh] lg:h-[65vh] overflow-auto border-[1px] border-gra-200 rounded" />
+          <TableComponent styles="z-10  h-[70vh] lg:h-[65vh] rounded" />
         </div>
         <button
           type=""
