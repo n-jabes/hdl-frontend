@@ -110,13 +110,18 @@ const MassiveSubscribers = () => {
   const GetAllSubscribers = async () => {
     setIsFetchingSubscribers(true);
     setIsStillLoading(true);
+    
+    // Start timing
+    const startTime = Date.now();
+    
     try {
       const response = await axios.get(
         'https://hdl-backend.onrender.com/subscribers/subscriber-location'
       );
-
+  
       const subscribers = response?.data?.data?.subscribers;
-
+      console.log("All subscribers: ", subscribers);
+  
       const formattedData = subscribers.map((subscriber, index) => ({
         id: index + 1,
         count: index + 1,
@@ -131,9 +136,15 @@ const MassiveSubscribers = () => {
         SiteName: subscriber?.matchingCoreArea?.SiteName,
         SectorLocation: subscriber?.matchingCoreArea?.SectorLocation,
       }));
-
+  
       setAllSubscribers(formattedData);
       setFilteredData(formattedData);
+  
+      // Stop timing
+      const endTime = Date.now();
+      const renderTime = endTime - startTime; // Time in milliseconds
+      console.log(`Time to fetch and render subscribers: ${renderTime} ms`);
+  
       setIsFetchingSubscribers(false);
       setIsStillLoading(false);
     } catch (error) {
@@ -151,6 +162,7 @@ const MassiveSubscribers = () => {
       });
     }
   };
+  
 
   useEffect(() => {
     GetAllSubscribers();
@@ -409,13 +421,13 @@ const MassiveSubscribers = () => {
             </button>
           </form>
         </div>
-        {isStillLoading && (
+        {/* {isStillLoading && (
           <div className="my-[1vh] text-center w-full">
             <h2 className="text-mainBlue text-xs text-center maw-w-4/5">
               still fetching ...
             </h2>
           </div>
-        )}
+        )} */}
         {error ? (
           <h2>{error}</h2>
         ) : (
