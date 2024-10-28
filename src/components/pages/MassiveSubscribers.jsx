@@ -110,16 +110,16 @@ const MassiveSubscribers = () => {
   const GetAllSubscribers = async () => {
     setIsFetchingSubscribers(true);
     setIsStillLoading(true);
-    
+  
     // Start timing
     const startTime = Date.now();
-    
-    try {
-      const response = await axios.get(
-        'https://hdl-backend.onrender.com/subscribers/subscriber-location'
-      );
   
-      const subscribers = response?.data?.data?.subscribers;
+    try {
+      const [subscribersResponse] = await Promise.all([
+        axios.get('https://hdl-backend.onrender.com/subscribers/subscriber-location'),
+      ]);
+  
+      const subscribers = subscribersResponse?.data?.data?.subscribers;
       console.log("All subscribers: ", subscribers);
   
       const formattedData = subscribers.map((subscriber, index) => ({
@@ -162,6 +162,7 @@ const MassiveSubscribers = () => {
       });
     }
   };
+  
   
 
   useEffect(() => {

@@ -16,7 +16,16 @@ const formatDateToYMDHM = (dateString) => {
 };
 
 const Home = () => {
-  return <h2>Dashboard</h2>;
+  return (
+    <div className="flex items-center justify-center flex-col">
+      <img
+        className="h-[35%] w-[35%]"
+        src="/404.png"
+        alt="not found page"
+      />
+      <h2>This page will be available soon!</h2>
+    </div>
+  );
 };
 
 export default Home;
