@@ -38,13 +38,13 @@ const SensitiveAreasMap = ({ siteCoordinates }) => {
     <GoogleMap
       mapContainerStyle={containerStyle}
       onLoad={onLoad}
-      center={defaultCenter}
+      center={center}
       zoom={12}
       options={{ streetViewControl: false, styles: mapStyles }}
     >
       {/* Draw geofence circle around the marker */}
-      <Marker position={siteCoordinates} icon={blueIcon} />
-      <Circle center={siteCoordinates} radius={1500} options={greenOptions} />
+      <Circle center={center} radius={1500} options={greenOptions} />
+      <Marker position={center} icon={blueIcon} />
     </GoogleMap>
   ) : (
     <div>Loading...</div>

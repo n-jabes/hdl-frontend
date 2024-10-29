@@ -1,10 +1,6 @@
 import React, { useState } from 'react';
 
-export default function SensitiveAreasTable({
-  styles,
-  tableData,
-  headers,
-}) {
+export default function SensitiveAreasTable({ styles, tableData, headers }) {
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
   const [filterText, setFilterText] = useState('');
@@ -69,24 +65,29 @@ export default function SensitiveAreasTable({
           <thead className="sticky top-0 bg-gray-700">
             <tr>
               {headers.map((header, index) => (
-                <th key={index} className="px-4 py-2 text-left font-light">{header}</th>
+                <th key={index} className="px-4 py-2 text-left font-light">
+                  {header}
+                </th>
               ))}
             </tr>
           </thead>
-            <tbody>
-              {currentData.map((subscriber, index) => (
-                <tr
-                  key={index}
-                  className="border-b border-gray-700 hover:bg-gray-700"
-                >
-                  <td className="px-4 py-2">{subscriber.index}</td>
-                  <td className="px-4 py-2">{subscriber.startTime}</td>
-                  <td className="px-4 py-2">{subscriber.IMSI}</td>
-                  <td className="px-4 py-2 text-mainBlue">{'*******' || subscriber.MSISDN}</td>
-                  <td className="px-4 py-2">{subscriber.IMEI}</td>
-                </tr>
-              ))}
-            </tbody>
+          <tbody>
+            {currentData.map((subscriber, index) => (
+              <tr
+                key={index}
+                className="border-b border-gray-700 hover:bg-gray-700"
+              >
+                <td className="px-4 py-2">{subscriber.index}</td>
+                <td className="px-4 py-2">{subscriber.startTime}</td>
+                <td className="px-4 py-2">{subscriber.fullNames}</td>
+                <td className="px-4 py-2">{subscriber.IMSI}</td>
+                <td className="px-4 py-2 text-mainBlue">
+                  {'*******' || subscriber.MSISDN}
+                </td>
+                <td className="px-4 py-2">{subscriber.IMEI}</td>
+              </tr>
+            ))}
+          </tbody>
         </table>
       </div>
 

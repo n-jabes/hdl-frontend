@@ -39,11 +39,13 @@ function MonitorSensitiveAreas(props) {
         IMSI: sub.IMSI,
         MSISDN: sub.MSISDN,
         IMEI: sub.IMEI,
+        fullNames: sub.fullNames,
         startTime: formatDateToYMDHM(sub.startTime),
         SiteName: sub.SiteName,
         SectorLocation: sub.SectorLocation,
       }));
     console.log('Site Subs: ', subs);
+    console.log('Site Subs: ', filteredData);
     setSiteBasedSubscribers(subs);
   };
 
@@ -186,18 +188,20 @@ function MonitorSensitiveAreas(props) {
   const GetAllSubscribers = async () => {
     setIsFetchingSubscribers(true);
     setIsStillLoading(true);
-  
+
     // Start timing
-    const startTime = Date.now();
-  
+    // const startTime = Date.now();
+
     try {
       const [subscribersResponse] = await Promise.all([
-        axios.get('https://hdl-backend.onrender.com/subscribers/subscriber-location'),
+        axios.get(
+          'https://hdl-backend.onrender.com/subscribers/subscriber-location'
+        ),
       ]);
-  
+
       const subscribers = subscribersResponse?.data?.data?.subscribers;
-      // console.log("All subscribers: ", subscribers);
-  
+      console.log("All subscribers: ", subscribers);
+
       const formattedData = subscribers.map((subscriber, index) => ({
         id: index + 1,
         count: index + 1,
@@ -208,19 +212,20 @@ function MonitorSensitiveAreas(props) {
         IMEI: subscriber.IMEI,
         MM: subscriber.MM,
         R: subscriber.R,
+        fullNames: "John Doe (Place holder)",
         Location: subscriber.Location,
         SiteName: subscriber?.matchingCoreArea?.SiteName,
         SectorLocation: subscriber?.matchingCoreArea?.SectorLocation,
       }));
-  
+
       setAllSubscribers(formattedData);
       setFilteredData(formattedData);
-  
+
       // Stop timing
-      const endTime = Date.now();
-      const renderTime = endTime - startTime; // Time in milliseconds
-      console.log(`Time to fetch and render subscribers: ${renderTime} ms`);
-  
+      // const endTime = Date.now();
+      // const renderTime = endTime - startTime; // Time in milliseconds
+      // console.log(`Time to fetch and render subscribers: ${renderTime} ms`);
+
       setIsFetchingSubscribers(false);
       setIsStillLoading(false);
     } catch (error) {
@@ -269,7 +274,7 @@ function MonitorSensitiveAreas(props) {
     setSelectedCoordinates(coordinates);
   };
 
-  const sensitiveAreasHeaders = ['#', 'Time', 'IMSI', 'MSISDN', 'IMEI'];
+  const sensitiveAreasHeaders = ['#', 'Time', 'Full Names','IMSI', 'MSISDN', 'IMEI'];
 
   return (
     <div className="min-h-[85vh] h-full w-full pb-4">
@@ -471,13 +476,17 @@ function MonitorSensitiveAreas(props) {
                 />
               </div>
               <div className="h-[300px] lg:h-full w-full lg:w-2/5 flex justify-center items-center">
-                {isStillLoading && (
+                {isStillLoading ? (
                   <div className="my-[15vh] flex flex-col gap-2 items-center">
                     {/* <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-mainBlue"></div> */}
                     <h2 className="text-gray-600 text-xs w-2/3 text-center mt-4">
                       Performing a background fetch, please wait until the fetch
                       is done to see all data
                     </h2>
+                  </div>
+                ) : (
+                  <div className="w-full h-full">
+                    <SensitiveAreasMap siteCoordinates={KIGALI_COORDINATES} />
                   </div>
                 )}
               </div>
