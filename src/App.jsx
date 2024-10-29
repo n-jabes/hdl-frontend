@@ -14,6 +14,7 @@ import ManageDevices from './components/pages/ManageDevices';
 import MonitorDevices from './components/pages/MonitorDevices';
 import MonitorSensitiveAreas from './components/pages/MonitorSensitiveAreas';
 import UploadFiles from './components/pages/UploadFiles';
+import ManageTargetedSubscribers from './components/pages/ManageTargetedSubscribers';
 
 function App() {
   const isAuthenticated = true;
@@ -32,6 +33,16 @@ function App() {
               <ProtectedRoutes isAuthenticated={isAuthenticated}>
                 <Layout>
                   <Home />
+                </Layout>
+              </ProtectedRoutes>
+            }
+          />
+          <Route
+            path="//manage-targeted-subscribers"
+            element={
+              <ProtectedRoutes isAuthenticated={isAuthenticated}>
+                <Layout>
+                  <ManageTargetedSubscribers />
                 </Layout>
               </ProtectedRoutes>
             }

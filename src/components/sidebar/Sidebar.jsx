@@ -15,6 +15,7 @@ import { IoClose } from 'react-icons/io5';
 import LocationDisabledIcon from '@mui/icons-material/LocationDisabled';
 import DevicesOtherIcon from '@mui/icons-material/DevicesOther';
 import TrackChangesIcon from '@mui/icons-material/TrackChanges';
+import ManageAccountsIcon from '@mui/icons-material/ManageAccounts';
 import axios from 'axios';
 
 const Sidebar = ({ isOpen, toggleSidebar }) => {
@@ -124,6 +125,19 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
           </div>
           {locationDropdownOpen && (
             <ul className="ml-8 space-y-1">
+              <li>
+                <Link
+                  to="/manage-targeted-subscribers"
+                  className={`flex items-center px-4 py-2 ${
+                    isActive('/manage-targeted-subscribers')
+                      ? 'bg-gray-700 rounded-l-[5px]'
+                      : 'hover:bg-gray-700 hover:rounded-l-[5px]'
+                  }`}
+                >
+                  <ManageAccountsIcon className="mr-3 h-4 w-4" />
+                  <span>Manage Targeted Subscribers</span>
+                </Link>
+              </li>
               <li>
                 <Link
                   to="/targeted-subscriber"

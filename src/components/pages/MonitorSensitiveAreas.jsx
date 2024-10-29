@@ -186,14 +186,18 @@ function MonitorSensitiveAreas(props) {
   const GetAllSubscribers = async () => {
     setIsFetchingSubscribers(true);
     setIsStillLoading(true);
+  
+    // Start timing
+    const startTime = Date.now();
+  
     try {
-      const response = await axios.get(
-        'https://hdl-backend.onrender.com/subscribers/subscriber-location'
-      );
-      const subscribers = response?.data?.data?.subscribers;
-
-      console.log('Subscribers', subscribers);
-
+      const [subscribersResponse] = await Promise.all([
+        axios.get('https://hdl-backend.onrender.com/subscribers/subscriber-location'),
+      ]);
+  
+      const subscribers = subscribersResponse?.data?.data?.subscribers;
+      // console.log("All subscribers: ", subscribers);
+  
       const formattedData = subscribers.map((subscriber, index) => ({
         id: index + 1,
         count: index + 1,
@@ -208,20 +212,32 @@ function MonitorSensitiveAreas(props) {
         SiteName: subscriber?.matchingCoreArea?.SiteName,
         SectorLocation: subscriber?.matchingCoreArea?.SectorLocation,
       }));
-
+  
       setAllSubscribers(formattedData);
       setFilteredData(formattedData);
-
+  
+      // Stop timing
+      const endTime = Date.now();
+      const renderTime = endTime - startTime; // Time in milliseconds
+      console.log(`Time to fetch and render subscribers: ${renderTime} ms`);
+  
       setIsFetchingSubscribers(false);
-      // Optional: Add a small delay to prevent overwhelming the API
-      await new Promise((resolve) => setTimeout(resolve, 100));
-
       setIsStillLoading(false);
     } catch (error) {
       console.log('Failed to fetch subscribers', error);
+      toast.info('Failed to fetch subscribers', {
+        position: 'top-right',
+        autoClose: 2000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: 'dark',
+        transition: Bounce,
+      });
     }
   };
-
   useEffect(() => {
     GetAllSubscribers();
   }, []);
@@ -451,6 +467,7 @@ function MonitorSensitiveAreas(props) {
                   isFetchingSubscribers={isFetchingSubscribers}
                   onRowClick={handleRowClick}
                   headers={sensitiveAreasHeaders}
+                  siteCoordinates={KIGALI_COORDINATES}
                 />
               </div>
               <div className="h-[300px] lg:h-full w-full lg:w-2/5 flex justify-center items-center">
@@ -471,7 +488,7 @@ function MonitorSensitiveAreas(props) {
         </div>
       ) : (
         <div className="w-full h-[90%]">
-          <SensitiveAreasMap />
+          <SensitiveAreasMap siteCoordinates={KIGALI_COORDINATES} />
         </div>
       )}
     </div>
