@@ -44,7 +44,7 @@ function MonitorSensitiveAreas(props) {
         SiteName: sub.SiteName,
         SectorLocation: sub.SectorLocation,
       }));
-    console.log('Site Subs: ', subs);
+    // console.log('Site Subs: ', subs);
     console.log('Site Subs: ', filteredData);
     setSiteBasedSubscribers(subs);
   };
@@ -200,7 +200,7 @@ function MonitorSensitiveAreas(props) {
       ]);
 
       const subscribers = subscribersResponse?.data?.data?.subscribers;
-      console.log("All subscribers: ", subscribers);
+      console.log('All subscribers: ', subscribers);
 
       const formattedData = subscribers.map((subscriber, index) => ({
         id: index + 1,
@@ -212,7 +212,7 @@ function MonitorSensitiveAreas(props) {
         IMEI: subscriber.IMEI,
         MM: subscriber.MM,
         R: subscriber.R,
-        fullNames: "John Doe (Place holder)",
+        fullNames: 'John Doe (Place holder)',
         Location: subscriber.Location,
         SiteName: subscriber?.matchingCoreArea?.SiteName,
         SectorLocation: subscriber?.matchingCoreArea?.SectorLocation,
@@ -274,7 +274,14 @@ function MonitorSensitiveAreas(props) {
     setSelectedCoordinates(coordinates);
   };
 
-  const sensitiveAreasHeaders = ['#', 'Time', 'Full Names','IMSI', 'MSISDN', 'IMEI'];
+  const sensitiveAreasHeaders = [
+    '#',
+    'Time',
+    'Full Names',
+    'IMSI',
+    'MSISDN',
+    'IMEI',
+  ];
 
   return (
     <div className="min-h-[85vh] h-full w-full pb-4">
@@ -353,7 +360,7 @@ function MonitorSensitiveAreas(props) {
             </button> */}
           </form>
           {siteBasedSubscribers.length > 0 ? (
-            <div className="h-max lg:h-full flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between ">
+            <div className="h-max pt-2 lg:h-full flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between ">
               <div className="h-max lg:max-h-full lg:h-full w-full lg:w-3/5 flex flex-col gap-2 overflow-auto flex-shrink-0">
                 {/* operator and date filters form */}
                 <div className="flex rounded-[5px] gap-2 flex-wrap bg-[#1A1D1F] px-2 py-3">
@@ -475,7 +482,7 @@ function MonitorSensitiveAreas(props) {
                   siteCoordinates={KIGALI_COORDINATES}
                 />
               </div>
-              <div className="h-[300px] lg:h-full w-full lg:w-2/5 flex justify-center items-center">
+              <div className="h-[300px] lg:min-h-[90vh] w-full lg:w-2/5 flex justify-center items-center bg-red-200">
                 {isStillLoading ? (
                   <div className="my-[15vh] flex flex-col gap-2 items-center">
                     {/* <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-mainBlue"></div> */}

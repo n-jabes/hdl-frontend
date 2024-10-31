@@ -21,6 +21,7 @@ const defaultCenter = {
 };
 
 const SensitiveAreasMap = ({ siteCoordinates }) => {
+  console.log('Site coordinates: ', siteCoordinates);
   const mapRef = useRef(null);
   const { isLoaded } = useJsApiLoader({
     id: 'f147f16e33a7b0e0',
@@ -38,13 +39,21 @@ const SensitiveAreasMap = ({ siteCoordinates }) => {
     <GoogleMap
       mapContainerStyle={containerStyle}
       onLoad={onLoad}
-      center={center}
+      center={defaultCenter}
       zoom={12}
       options={{ streetViewControl: false, styles: mapStyles }}
     >
-      {/* Draw geofence circle around the marker */}
-      <Circle center={center} radius={1500} options={greenOptions} />
-      <Marker position={center} icon={blueIcon} />
+      {siteCoordinates && (
+        <>
+          {/* Draw geofence circle around the marker */}
+          <Marker position={siteCoordinates} icon={blueIcon} />
+          <Circle
+            center={siteCoordinates}
+            radius={1500}
+            options={greenOptions}
+          />
+        </>
+      )}
     </GoogleMap>
   ) : (
     <div>Loading...</div>
