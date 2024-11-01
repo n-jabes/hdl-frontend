@@ -47,7 +47,7 @@ function MonitorSensitiveAreas(props) {
         Latitude: sub.Latitude,
         Longitude: sub.Longitude,
       }));
-    console.log('Site Subs: ', filteredData);
+    // console.log('Site Subs: ', filteredData);
 
     // Update user coordinates for map
     const coordinates = subs
@@ -59,7 +59,7 @@ function MonitorSensitiveAreas(props) {
       }))
       .filter((coord) => !isNaN(coord.lat) && !isNaN(coord.lng));
 
-      console.log("sub coordinates")
+      // console.log("sub coordinates")
 
     setSubscriberCoordinates(coordinates);
     setSiteBasedSubscribers(subs);

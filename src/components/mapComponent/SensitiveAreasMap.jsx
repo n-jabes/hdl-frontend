@@ -40,7 +40,7 @@ const greenOptions = {
 
 const SensitiveAreasMap = ({subscriberCoordinates}) => {
 
-  console.log("subscriberCoordinates: ", subscriberCoordinates)
+  // console.log("subscriberCoordinates: ", subscriberCoordinates)
   const [sensitiveAreas, setSensitiveAreas] = useState([]);
   const mapRef = useRef(null);
   const { isLoaded } = useJsApiLoader({
