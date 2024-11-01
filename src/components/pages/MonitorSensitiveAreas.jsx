@@ -47,15 +47,10 @@ function MonitorSensitiveAreas(props) {
         Latitude: sub.Latitude,
         Longitude: sub.Longitude,
       }));
-    // console.log('Site Subs: ', filteredData);
-    setSiteBasedSubscribers(subs);
-  };
-
-  useEffect(() => {
-    handleFindSiteBasedSubscribers();
+    console.log('Site Subs: ', filteredData);
 
     // Update user coordinates for map
-    const coordinates = siteBasedSubscribers
+    const coordinates = subs
       .map((subscriber) => ({
         fullNames: subscriber.fullNames,
         MSISDN: subscriber.MSISDN,
@@ -64,7 +59,15 @@ function MonitorSensitiveAreas(props) {
       }))
       .filter((coord) => !isNaN(coord.lat) && !isNaN(coord.lng));
 
+      console.log("sub coordinates")
+
     setSubscriberCoordinates(coordinates);
+    setSiteBasedSubscribers(subs);
+  };
+
+  useEffect(() => {
+    handleFindSiteBasedSubscribers();
+
   }, [siteName, filteredData]);
 
   const handleFilterValueChange = (event) => {
@@ -292,7 +295,6 @@ function MonitorSensitiveAreas(props) {
     'IMEI',
   ];
 
-  console.log("Users around: ", subscriberCoordinates)
 
   return (
     <div className="min-h-[85vh] h-full w-full pb-4">
