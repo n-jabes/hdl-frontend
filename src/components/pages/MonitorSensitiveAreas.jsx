@@ -28,6 +28,7 @@ function MonitorSensitiveAreas(props) {
   const [isStillLoading, setIsStillLoading] = useState(false);
   const [selectedCoordinates, setSelectedCoordinates] = useState([]);
   const [siteBasedSubscribers, setSiteBasedSubscribers] = useState([]);
+  const [subscriberCoordinates, setSubscriberCoordinates] = useState([]);
 
   const KIGALI_COORDINATES = { lat: -1.9577, lng: 30.1127 };
 
@@ -43,14 +44,27 @@ function MonitorSensitiveAreas(props) {
         startTime: formatDateToYMDHM(sub.startTime),
         SiteName: sub.SiteName,
         SectorLocation: sub.SectorLocation,
+        Latitude: sub.Latitude,
+        Longitude: sub.Longitude,
       }));
-    // console.log('Site Subs: ', subs);
-    console.log('Site Subs: ', filteredData);
+    // console.log('Site Subs: ', filteredData);
     setSiteBasedSubscribers(subs);
   };
 
   useEffect(() => {
     handleFindSiteBasedSubscribers();
+
+    // Update user coordinates for map
+    const coordinates = siteBasedSubscribers
+      .map((subscriber) => ({
+        fullNames: subscriber.fullNames,
+        MSISDN: subscriber.MSISDN,
+        lat: parseFloat(subscriber.Latitude || '-1.9577'),
+        lng: parseFloat(subscriber.Longitude || '30.1127'),
+      }))
+      .filter((coord) => !isNaN(coord.lat) && !isNaN(coord.lng));
+
+    setSubscriberCoordinates(coordinates);
   }, [siteName, filteredData]);
 
   const handleFilterValueChange = (event) => {
@@ -189,9 +203,6 @@ function MonitorSensitiveAreas(props) {
     setIsFetchingSubscribers(true);
     setIsStillLoading(true);
 
-    // Start timing
-    // const startTime = Date.now();
-
     try {
       const [subscribersResponse] = await Promise.all([
         axios.get(
@@ -200,7 +211,7 @@ function MonitorSensitiveAreas(props) {
       ]);
 
       const subscribers = subscribersResponse?.data?.data?.subscribers;
-      console.log('All subscribers: ', subscribers);
+      // console.log('All subscribers: ', subscribers);
 
       const formattedData = subscribers.map((subscriber, index) => ({
         id: index + 1,
@@ -216,15 +227,12 @@ function MonitorSensitiveAreas(props) {
         Location: subscriber.Location,
         SiteName: subscriber?.matchingCoreArea?.SiteName,
         SectorLocation: subscriber?.matchingCoreArea?.SectorLocation,
+        Latitude: subscriber?.matchingCoreArea?.Latitude,
+        Longitude: subscriber?.matchingCoreArea?.Longitude,
       }));
 
       setAllSubscribers(formattedData);
       setFilteredData(formattedData);
-
-      // Stop timing
-      // const endTime = Date.now();
-      // const renderTime = endTime - startTime; // Time in milliseconds
-      // console.log(`Time to fetch and render subscribers: ${renderTime} ms`);
 
       setIsFetchingSubscribers(false);
       setIsStillLoading(false);
@@ -243,6 +251,7 @@ function MonitorSensitiveAreas(props) {
       });
     }
   };
+
   useEffect(() => {
     GetAllSubscribers();
   }, []);
@@ -282,6 +291,8 @@ function MonitorSensitiveAreas(props) {
     'MSISDN',
     'IMEI',
   ];
+
+  console.log("Users around: ", subscriberCoordinates)
 
   return (
     <div className="min-h-[85vh] h-full w-full pb-4">
@@ -330,7 +341,6 @@ function MonitorSensitiveAreas(props) {
               />
             </div>
 
-            {/* only show sites when a sector location is present */}
             {sectorLocation && (
               <div className="flex flex-col gap-[5px]">
                 <label htmlFor="SiteName" className="text-sm text-gray-400">
@@ -355,14 +365,10 @@ function MonitorSensitiveAreas(props) {
                 </select>
               </div>
             )}
-            {/* <button className="bg-mainBlue p-3 rounded-sm text-xs h-max">
-              Search
-            </button> */}
           </form>
           {siteBasedSubscribers.length > 0 ? (
             <div className="h-max pt-2 lg:h-full flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between ">
               <div className="h-max lg:max-h-full lg:h-full w-full lg:w-3/5 flex flex-col gap-2 overflow-auto flex-shrink-0">
-                {/* operator and date filters form */}
                 <div className="flex rounded-[5px] gap-2 flex-wrap bg-[#1A1D1F] px-2 py-3">
                   <form
                     action="#"
@@ -485,7 +491,6 @@ function MonitorSensitiveAreas(props) {
               <div className="h-[300px] lg:min-h-[90vh] w-full lg:w-2/5 flex justify-center items-center bg-red-200">
                 {isStillLoading ? (
                   <div className="my-[15vh] flex flex-col gap-2 items-center">
-                    {/* <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-mainBlue"></div> */}
                     <h2 className="text-gray-600 text-xs w-2/3 text-center mt-4">
                       Performing a background fetch, please wait until the fetch
                       is done to see all data
@@ -493,7 +498,9 @@ function MonitorSensitiveAreas(props) {
                   </div>
                 ) : (
                   <div className="w-full h-full">
-                    <SensitiveAreasMap siteCoordinates={KIGALI_COORDINATES} />
+                    <SensitiveAreasMap 
+                      subscriberCoordinates={subscriberCoordinates} 
+                    />
                   </div>
                 )}
               </div>
@@ -504,7 +511,9 @@ function MonitorSensitiveAreas(props) {
         </div>
       ) : (
         <div className="w-full h-[90%]">
-          <SensitiveAreasMap siteCoordinates={KIGALI_COORDINATES} />
+          <SensitiveAreasMap 
+            subscriberCoordinates={subscriberCoordinates} 
+          />
         </div>
       )}
     </div>

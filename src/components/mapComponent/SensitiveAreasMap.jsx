@@ -13,6 +13,7 @@ const containerStyle = {
 };
 
 const blueIcon = 'http://maps.google.com/mapfiles/ms/icons/blue-dot.png';
+const redIcon = 'http://maps.google.com/mapfiles/ms/icons/red-dot.png';
 
 // Default coordinates for Kigali
 const defaultCenter = {
@@ -37,7 +38,7 @@ const greenOptions = {
   fillColor: '#1279ff',
 };
 
-const SensitiveAreasMap = () => {
+const SensitiveAreasMap = ({subscriberCoordinates}) => {
   const [sensitiveAreas, setSensitiveAreas] = useState([]);
   const mapRef = useRef(null);
   const { isLoaded } = useJsApiLoader({
@@ -81,13 +82,18 @@ const SensitiveAreasMap = () => {
     mapRef.current = map; // Store the map instance in the ref
   }, []);
 
-  // Determine map center based on sensitive areas or use default
-  const center = sensitiveAreas.length > 0 
+  // Determine map center based on coordinates or use default
+  const center = subscriberCoordinates.length > 0 
     ? {
-        lat: sensitiveAreas[0].latitude, 
-        lng: sensitiveAreas[0].longitude
+        lat: subscriberCoordinates[0].lat, 
+        lng: subscriberCoordinates[0].lng
       } 
-    : defaultCenter;
+    : (sensitiveAreas.length > 0 
+      ? {
+          lat: sensitiveAreas[0].latitude, 
+          lng: sensitiveAreas[0].longitude
+        } 
+      : defaultCenter);
 
   return isLoaded ? (
     <GoogleMap
@@ -97,8 +103,9 @@ const SensitiveAreasMap = () => {
       zoom={12}
       options={{ streetViewControl: false, styles: mapStyles }}
     >
+      {/* Render Sensitive Areas */}
       {sensitiveAreas.map((area, index) => (
-        <React.Fragment key={index}>
+        <React.Fragment key={`sensitive-${index}`}>
           {/* Marker for each sensitive area */}
           <Marker 
             position={{
@@ -118,6 +125,19 @@ const SensitiveAreasMap = () => {
             options={greenOptions}
           />
         </React.Fragment>
+      ))}
+
+      {/* Render Subscriber Coordinates */}
+      {subscriberCoordinates.map((subscriber, index) => (
+        <Marker 
+          key={`subscriber-${index}`}
+          position={{
+            lat: subscriber.lat, 
+            lng: subscriber.lng
+          }} 
+          icon={redIcon}
+          title={subscriber.fullNames} // Optional: show name on hover
+        />
       ))}
     </GoogleMap>
   ) : (
