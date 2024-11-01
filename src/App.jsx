@@ -9,12 +9,12 @@ import Home from './components/pages/Home';
 import TargetedSubscriber from './components/pages/TargetedSubscriber';
 import MassiveSubscribers from './components/pages/MassiveSubscribers';
 import EmergencyAlert from './components/pages/EmergencyAlert';
-import AddSensitiveArea from './components/pages/AddSensitiveArea';
 import ManageDevices from './components/pages/ManageDevices';
 import MonitorDevices from './components/pages/MonitorDevices';
 import MonitorSensitiveAreas from './components/pages/MonitorSensitiveAreas';
 import UploadFiles from './components/pages/UploadFiles';
 import ManageTargetedSubscribers from './components/pages/ManageTargetedSubscribers';
+import ManageSensitiveAreas from './components/pages/ManageSensitiveAreas';
 
 function App() {
   const isAuthenticated = true;
@@ -98,11 +98,11 @@ function App() {
             }
           />
           <Route
-            path="/add-sensitive-area"
+            path="/manage-sensitive-areas"
             element={
               <ProtectedRoutes isAuthenticated={isAuthenticated}>
                 <Layout>
-                  <AddSensitiveArea />
+                  <ManageSensitiveAreas />
                 </Layout>
               </ProtectedRoutes>
             }

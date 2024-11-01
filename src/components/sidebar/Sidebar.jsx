@@ -262,9 +262,9 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
             <ul className="ml-8 space-y-1">
               <li>
                 <Link
-                  to="/add-sensitive-area"
+                  to="/manage-sensitive-areas"
                   className={`flex items-center px-4 py-2 ${
-                    isActive('/add-sensitive-area')
+                    isActive('/manage-sensitive-areas')
                       ? 'bg-gray-700 rounded-l-[5px]'
                       : 'hover:bg-gray-700 hover:rounded-l-[5px]'
                   }`}
@@ -273,7 +273,7 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
                     className="mr-3"
                     sx={{ fontSize: 18 }}
                   />
-                  <span>Sensitive Areas</span>
+                  <span>Manage Sensitive Areas</span>
                 </Link>
               </li>
               <li>

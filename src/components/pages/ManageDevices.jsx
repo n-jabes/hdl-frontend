@@ -36,6 +36,7 @@ function ManageDevices(props) {
     'Duration (days)',
     'Actions'
   ];
+  
   const allDevicesData = allDevices.map((device, index) => ({
     index: ++index,
     deviceId: device.deviceId,

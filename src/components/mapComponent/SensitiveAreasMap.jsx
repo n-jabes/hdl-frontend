@@ -1,4 +1,4 @@
-import React, { useRef, useCallback } from 'react';
+import React, { useRef, useCallback, useState, useEffect } from 'react';
 import {
   Circle,
   GoogleMap,
@@ -20,46 +20,6 @@ const defaultCenter = {
   lng: 30.1127,
 };
 
-const SensitiveAreasMap = ({ siteCoordinates }) => {
-  console.log('Site coordinates: ', siteCoordinates);
-  const mapRef = useRef(null);
-  const { isLoaded } = useJsApiLoader({
-    id: 'f147f16e33a7b0e0',
-    googleMapsApiKey: 'AIzaSyDJOXNvQcvI8m7BdR5bc4xmDvxE_wly5Sg',
-  });
-
-  const onLoad = useCallback((map) => {
-    mapRef.current = map; // Store the map instance in the ref
-  }, []);
-
-  // Use provided siteCoordinates if available, otherwise fallback to defaultCenter
-  const center = siteCoordinates || defaultCenter;
-
-  return isLoaded ? (
-    <GoogleMap
-      mapContainerStyle={containerStyle}
-      onLoad={onLoad}
-      center={defaultCenter}
-      zoom={12}
-      options={{ streetViewControl: false, styles: mapStyles }}
-    >
-      {siteCoordinates && (
-        <>
-          {/* Draw geofence circle around the marker */}
-          <Marker position={siteCoordinates} icon={blueIcon} />
-          <Circle
-            center={siteCoordinates}
-            radius={1500}
-            options={greenOptions}
-          />
-        </>
-      )}
-    </GoogleMap>
-  ) : (
-    <div>Loading...</div>
-  );
-};
-
 // Styles for geofence circle
 const defaultOptions = {
   strokeWeight: 0.9,
@@ -75,6 +35,94 @@ const greenOptions = {
   fillOpacity: 0.15,
   strokeColor: '#1279ff',
   fillColor: '#1279ff',
+};
+
+const SensitiveAreasMap = () => {
+  const [sensitiveAreas, setSensitiveAreas] = useState([]);
+  const mapRef = useRef(null);
+  const { isLoaded } = useJsApiLoader({
+    id: 'f147f16e33a7b0e0',
+    googleMapsApiKey: 'AIzaSyDJOXNvQcvI8m7BdR5bc4xmDvxE_wly5Sg',
+  });
+
+  // Parse and clean coordinate values
+  const parseCoordinate = (coord) => {
+    // Remove whitespace and convert to number
+    const parsedCoord = parseFloat(String(coord).trim());
+    
+    // Validate that it's a valid number
+    return !isNaN(parsedCoord) ? parsedCoord : null;
+  };
+
+  // Load sensitive areas from local storage on component mount
+  useEffect(() => {
+    try {
+      const storedAreas = JSON.parse(localStorage.getItem('sensitiveAreas') || '[]');
+      
+      // Filter and clean areas with valid coordinates
+      const validAreas = storedAreas.filter(area => {
+        const lat = parseCoordinate(area.latitude);
+        const lng = parseCoordinate(area.longitude);
+        return lat !== null && lng !== null;
+      }).map(area => ({
+        ...area,
+        latitude: parseCoordinate(area.latitude),
+        longitude: parseCoordinate(area.longitude)
+      }));
+
+      setSensitiveAreas(validAreas);
+    } catch (error) {
+      console.error('Error loading sensitive areas from local storage:', error);
+      setSensitiveAreas([]);
+    }
+  }, []);
+
+  const onLoad = useCallback((map) => {
+    mapRef.current = map; // Store the map instance in the ref
+  }, []);
+
+  // Determine map center based on sensitive areas or use default
+  const center = sensitiveAreas.length > 0 
+    ? {
+        lat: sensitiveAreas[0].latitude, 
+        lng: sensitiveAreas[0].longitude
+      } 
+    : defaultCenter;
+
+  return isLoaded ? (
+    <GoogleMap
+      mapContainerStyle={containerStyle}
+      onLoad={onLoad}
+      center={center}
+      zoom={12}
+      options={{ streetViewControl: false, styles: mapStyles }}
+    >
+      {sensitiveAreas.map((area, index) => (
+        <React.Fragment key={index}>
+          {/* Marker for each sensitive area */}
+          <Marker 
+            position={{
+              lat: area.latitude, 
+              lng: area.longitude
+            }} 
+            icon={blueIcon} 
+          />
+          
+          {/* Geofence circle around each marker */}
+          <Circle
+            center={{
+              lat: area.latitude, 
+              lng: area.longitude
+            }}
+            radius={1500} // You can make this configurable per area if needed
+            options={greenOptions}
+          />
+        </React.Fragment>
+      ))}
+    </GoogleMap>
+  ) : (
+    <div>Loading...</div>
+  );
 };
 
 export default SensitiveAreasMap;
