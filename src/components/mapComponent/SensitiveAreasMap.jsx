@@ -61,6 +61,7 @@ const SensitiveAreasMap = ({subscriberCoordinates}) => {
   useEffect(() => {
     try {
       const storedAreas = JSON.parse(localStorage.getItem('sensitiveAreas') || '[]');
+      // console.log('stored areas: ', storedAreas)
       
       // Filter and clean areas with valid coordinates
       const validAreas = storedAreas.filter(area => {

@@ -17,7 +17,7 @@ const ManageSensitiveAreas = () => {
     'Sector Location',
     'Site Name',
     'Coordinates',
-    'Actions'
+    'Actions',
   ];
 
   const validateForm = (formData) => {
@@ -49,6 +49,16 @@ const ManageSensitiveAreas = () => {
       latitudeNum > 90
     ) {
       errors.latitude = 'Enter a valid latitude (-90 to 90)';
+    }
+
+    const azmuthNum = parseInt(formData.azmuth);
+    if (
+      !formData.azmuth ||
+      isNaN(azmuthNum) ||
+      azmuthNum < 0 ||
+      azmuthNum > 360
+    ) {
+      errors.azmuth = 'Enter a valid azmuth (0 to 360)';
     }
 
     if (!formData.description.trim()) {
@@ -84,6 +94,7 @@ const ManageSensitiveAreas = () => {
       siteName: e.target.siteName.value,
       longitude: e.target.longitude.value,
       latitude: e.target.latitude.value,
+      azmuth: e.target.azmuth.value,
       description: e.target.description.value,
       date: new Date().toISOString(),
       id: `SA-${Date.now()}`,
@@ -271,6 +282,26 @@ const ManageSensitiveAreas = () => {
                         {renderFormError('longitude')}
                       </div>
 
+                      <div className="flex flex-col gap-[2px] w-[48%] min-w-[200px] mb-2">
+                        <label
+                          htmlFor="azmuth"
+                          className="text-xs text-gray-300"
+                        >
+                          Azmuth
+                        </label>
+                        <input
+                          type="text"
+                          name="azmuth"
+                          id="azmuth"
+                          className={`py-2 px-[2px] text-sm outline-none border-b-[1px] ${
+                            formErrors.azmuth
+                              ? 'border-b-red-400'
+                              : 'border-b-gray-200'
+                          } bg-gray-300/5`}
+                        />
+                        {renderFormError('azmuth')}
+                      </div>
+
                       <div className="flex flex-col gap-[2px] w-full min-w-[200px] mb-2">
                         <label
                           htmlFor="description"
@@ -293,7 +324,7 @@ const ManageSensitiveAreas = () => {
 
                     <button
                       type="submit"
-                      className={`py-2 px-6 text-xs text-white rounded ${
+                      className={`py-2 px-6 text-xs text-white rounded mb-4 ${
                         isRegistering
                           ? 'cursor-not-allowed bg-gray-600'
                           : 'bg-mainBlue hover:bg-blue-500'

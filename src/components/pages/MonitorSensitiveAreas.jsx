@@ -16,8 +16,8 @@ const formatDateToYMDHM = (dateString) => {
 
 function MonitorSensitiveAreas(props) {
   const [tab, setTab] = useState('table');
-  const [sectorLocation, setSectorLocation] = useState('');
   const [siteName, setSiteName] = useState('');
+  const [sectorLocation, setSectorLocation] = useState('');
   const [allSubscribers, setAllSubscribers] = useState([]);
   const [filteredData, setFilteredData] = useState(allSubscribers);
   const [filterType, setFilterType] = useState('IMSI');
@@ -34,7 +34,7 @@ function MonitorSensitiveAreas(props) {
 
   const handleFindSiteBasedSubscribers = () => {
     const subs = filteredData
-      .filter((item) => item.SiteName === siteName)
+      .filter((item) => item.SectorLocation === sectorLocation)
       .map((sub, index) => ({
         index: ++index,
         IMSI: sub.IMSI,
@@ -59,7 +59,7 @@ function MonitorSensitiveAreas(props) {
       }))
       .filter((coord) => !isNaN(coord.lat) && !isNaN(coord.lng));
 
-      // console.log("sub coordinates")
+      // console.log("sub coordinates", subs)
 
     setSubscriberCoordinates(coordinates);
     setSiteBasedSubscribers(subs);
@@ -68,7 +68,7 @@ function MonitorSensitiveAreas(props) {
   useEffect(() => {
     handleFindSiteBasedSubscribers();
 
-  }, [siteName, filteredData]);
+  }, [sectorLocation, filteredData]);
 
   const handleFilterValueChange = (event) => {
     setFilterValue(event.target.value);
@@ -86,12 +86,12 @@ function MonitorSensitiveAreas(props) {
     setToDate(event.target.value);
   };
 
-  const handleSetSectorLocation = (value) => {
-    setSectorLocation(value);
-  };
-
   const handleSetSiteName = (value) => {
     setSiteName(value);
+  };
+
+  const handleSetSectorLocation= (value) => {
+    setSectorLocation(value);
   };
 
   const filterSubscribers = () => {
@@ -126,7 +126,7 @@ function MonitorSensitiveAreas(props) {
       R: subscriber.R,
       Location: subscriber.Location,
       SiteName: subscriber.SiteName,
-      SectorLocation: subscriber.SectorLocation,
+      SiteName: subscriber.SiteName,
     }));
 
     setFilteredData(formattedData);
@@ -153,7 +153,7 @@ function MonitorSensitiveAreas(props) {
         RAC: 'Unknown',
         CI: 'Unknown',
         SiteName: 'Unknown',
-        SectorLocation: 'Unknown',
+        SiteName: 'Unknown',
         Longitude: '30.1127',
         Latitude: '-1.9577',
         Azimuth: 'Unknown',
@@ -178,7 +178,7 @@ function MonitorSensitiveAreas(props) {
           RAC: 'Unknown',
           CI: 'Unknown',
           SiteName: 'Unknown',
-          SectorLocation: 'Unknown',
+          SiteName: 'Unknown',
           Longitude: '30.1127',
           Latitude: '-1.9577',
           Azimuth: 'Unknown',
@@ -194,7 +194,7 @@ function MonitorSensitiveAreas(props) {
         RAC: 'Unknown',
         CI: 'Unknown',
         SiteName: 'Unknown',
-        SectorLocation: 'Unknown',
+        SiteName: 'Unknown',
         Longitude: '30.1127',
         Latitude: '-1.9577',
         Azimuth: 'Unknown',
@@ -330,40 +330,40 @@ function MonitorSensitiveAreas(props) {
             }}
           >
             <div className="flex flex-col gap-[5px]">
-              <label htmlFor="SectoLocation" className="text-sm text-gray-400">
-                Enter Sector Location
+              <label htmlFor="SiteName" className="text-sm text-gray-400">
+                Enter Site Name
               </label>
               <input
                 type="text"
-                placeholder="Enter Sector Location"
-                name="SectorLocation"
-                id="SectorLocation"
-                onChange={(e) => handleSetSectorLocation(e.target.value)}
+                placeholder="Enter Site Name"
+                name="SiteName"
+                id="SiteName"
+                onChange={(e) => handleSetSiteName(e.target.value)}
                 className=" bg-gray-100 text-gray-600 text-xs py-3 px-3 outline-none rounded-[2px]"
               />
             </div>
 
-            {sectorLocation && (
+            {siteName && (
               <div className="flex flex-col gap-[5px]">
-                <label htmlFor="SiteName" className="text-sm text-gray-400">
-                  Choose Site
+                <label htmlFor="SectorLocation" className="text-sm text-gray-400">
+                  Choose Sector Location
                 </label>
                 <select
                   type="text"
-                  placeholder="Choose Site Name"
-                  name="SiteName"
-                  id="SiteName"
+                  placeholder="Choose Sector Location"
+                  name="SectorLocation"
+                  id="SectorLocation"
                   required
                   onChange={(e) => {
                     setSiteBasedSubscribers([]);
-                    handleSetSiteName(e.target.value);
+                    handleSetSectorLocation(e.target.value);
                   }}
                   className="bg-gray-100 text-gray-700 text-xs py-3 px-3 outline-none rounded-[2px]"
                 >
-                  <option value="">Select site</option>
-                  <option value="Kamuhoza">Kamuhoza</option>
-                  <option value="Golf_Club">Golf_Club</option>
-                  <option value="MPW">MPW</option>
+                  <option value="">Select location</option>
+                  <option value="4K311B">4K311B</option>
+                  <option value="4K117A">4K117A</option>
+                  <option value="4K194B">4K194B</option>
                 </select>
               </div>
             )}
@@ -508,7 +508,7 @@ function MonitorSensitiveAreas(props) {
               </div>
             </div>
           ) : (
-            <h2 className="text-gray-400 mt-2">Please select a location</h2>
+            <h2 className="text-gray-400 mt-2">Please select a site name</h2>
           )}
         </div>
       ) : (
