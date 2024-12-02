@@ -4,7 +4,6 @@ import { FaRegEdit } from 'react-icons/fa';
 import { IoTrashOutline } from 'react-icons/io5';
 import { toast, Bounce } from 'react-toastify';
 
-
 export function UpdateButton({ deviceDetails, fetchAllDevices }) {
   const [showUpdateForm, setShowUpdateForm] = useState(false);
   const [isUpdatingDevice, setIsUpdatingDevice] = useState(false);
@@ -15,8 +14,6 @@ export function UpdateButton({ deviceDetails, fetchAllDevices }) {
     duration: deviceDetails.duration,
     description: deviceDetails.description,
   });
-
-
 
   const handleInputChange = (e) => {
     setFormData({
@@ -164,16 +161,10 @@ export function UpdateButton({ deviceDetails, fetchAllDevices }) {
                       className="py-2 px-[2px] text-sm outline-none border-b-[1px] border-b-gray-200 bg-gray-300/5"
                       required
                     >
-                      <option 
-                        value="Cell phone" 
-                        className="text-gray-600"
-                      >
+                      <option value="Cell phone" className="text-gray-600">
                         Mobile Phone
                       </option>
-                      <option 
-                        value="Vehicle" 
-                        className="text-gray-600"
-                      >
+                      <option value="Vehicle" className="text-gray-600">
                         Vehicle
                       </option>
                       <option
@@ -290,7 +281,7 @@ export function DeleteButton({ deviceDetails, fetchAllDevices }) {
         theme: 'light',
         transition: Bounce,
       });
-      fetchAllDevices()
+      fetchAllDevices();
     } catch (error) {
       console.error('Failed to delete device: ', error);
       toast.error(error?.response?.data?.message || 'Failed to delete device', {
@@ -329,16 +320,24 @@ export function DeleteButton({ deviceDetails, fetchAllDevices }) {
 export function DeviceButtons({ deviceDetails, fetchAllDevices }) {
   return (
     <div className="flex gap-2 items-center">
-      <UpdateButton deviceDetails={deviceDetails} fetchAllDevices={fetchAllDevices} />
-      <DeleteButton deviceDetails={deviceDetails} fetchAllDevices={fetchAllDevices}/>
+      <UpdateButton
+        deviceDetails={deviceDetails}
+        fetchAllDevices={fetchAllDevices}
+      />
+      <DeleteButton
+        deviceDetails={deviceDetails}
+        fetchAllDevices={fetchAllDevices}
+      />
     </div>
   );
 }
 
-
 // sensitive area buttons
 
-export function UpdateSensitiveAreaButton({ sensitiveAreaDetails, fetchAllSensitiveAreas }) {
+export function UpdateSensitiveAreaButton({
+  sensitiveAreaDetails,
+  fetchAllSensitiveAreas,
+}) {
   const [showUpdateForm, setShowUpdateForm] = useState(false);
   const [isUpdatingArea, setIsUpdatingArea] = useState(false);
   const [formData, setFormData] = useState({
@@ -346,8 +345,10 @@ export function UpdateSensitiveAreaButton({ sensitiveAreaDetails, fetchAllSensit
     siteName: sensitiveAreaDetails.siteName,
     latitude: sensitiveAreaDetails.latitude,
     longitude: sensitiveAreaDetails.longitude,
-    description: sensitiveAreaDetails.description
+    azmuth: sensitiveAreaDetails.azmuth,
+    description: sensitiveAreaDetails.description,
   });
+  const [formErrors, setFormErrors] = useState({});
 
   const validateForm = (formData) => {
     const errors = {};
@@ -380,6 +381,16 @@ export function UpdateSensitiveAreaButton({ sensitiveAreaDetails, fetchAllSensit
       errors.latitude = 'Enter a valid latitude (-90 to 90)';
     }
 
+    const azmuthNum = parseFloat(formData.azmuth);
+    if (
+      !formData.azmuth ||
+      isNaN(azmuthNum) ||
+      azmuthNum < 0 ||
+      azmuthNum > 360
+    ) {
+      errors.azmuth = 'Enter a valid azmuth (0 to 360)';
+    }
+
     if (!formData.description.trim()) {
       errors.description = 'Description is required';
     }
@@ -389,9 +400,9 @@ export function UpdateSensitiveAreaButton({ sensitiveAreaDetails, fetchAllSensit
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      [name]: value
+      [name]: value,
     }));
   };
 
@@ -407,27 +418,22 @@ export function UpdateSensitiveAreaButton({ sensitiveAreaDetails, fetchAllSensit
         theme: 'light',
         transition: Bounce,
       });
+      setFormErrors(errors);
       setIsUpdatingArea(false);
       return;
     }
 
     try {
-      // Retrieve existing sensitive areas
       const existingAreas = JSON.parse(
         localStorage.getItem('sensitiveAreas') || '[]'
       );
 
-      // Find and update the specific sensitive area
-      const updatedAreas = existingAreas.map(area => 
-        area.id === sensitiveAreaDetails.id 
-          ? { ...area, ...formData } 
-          : area
+      const updatedAreas = existingAreas.map((area) =>
+        area.id === sensitiveAreaDetails.id ? { ...area, ...formData } : area
       );
 
-      // Save updated areas back to localStorage
       localStorage.setItem('sensitiveAreas', JSON.stringify(updatedAreas));
 
-      // Update state and close form
       fetchAllSensitiveAreas();
       setShowUpdateForm(false);
 
@@ -446,7 +452,18 @@ export function UpdateSensitiveAreaButton({ sensitiveAreaDetails, fetchAllSensit
       });
     } finally {
       setIsUpdatingArea(false);
+      setFormErrors({});
     }
+  };
+
+  const renderFormError = (field) => {
+    return (
+      formErrors[field] && (
+        <span className="text-red-400 text-[10px] mt-1">
+          {formErrors[field]}
+        </span>
+      )
+    );
   };
 
   return (
@@ -461,26 +478,35 @@ export function UpdateSensitiveAreaButton({ sensitiveAreaDetails, fetchAllSensit
               >
                 x
               </button>
-              <h1 className="w-[70%] sm:h-[2rem] h-max capitalize text-gray-300 font-semibold mt-2 md:mt-0 text-sm md:text-md mb-4">
+              <h1 className="w-[70%] sm:h-[2rem] h-max capitalize text-gray-300 font-semibold mt-2 md:mt-0 text-sm md:text-md ">
                 Update Sensitive Area
               </h1>
 
               <form
                 onSubmit={updateSensitiveArea}
-                className="flex flex-wrap gap-2 items-end justify-between w-full text-gray-300"
+                className="flex flex-wrap gap-2 items-end justify-between w-full text-gray-300 pb-4"
               >
                 <div className="flex flex-wrap w-full items-center justify-between">
                   <div className="flex flex-col gap-[2px] w-[48%] min-w-[200px] mb-2">
-                    <label htmlFor="sectorLocation" className="text-xs text-gray-300">
+                    <label
+                      htmlFor="sectorLocation"
+                      className="text-xs text-gray-300"
+                    >
                       Sector Location
                     </label>
                     <input
                       type="text"
                       name="sectorLocation"
+                      id="sectorLocation"
                       value={formData.sectorLocation}
                       onChange={handleInputChange}
-                      className="py-2 px-[2px] text-sm outline-none border-b-[1px] border-b-gray-200 bg-gray-300/5"
+                      className={`py-2 px-[2px] text-sm outline-none border-b-[1px] ${
+                        formErrors.sectorLocation
+                          ? 'border-b-red-400'
+                          : 'border-b-gray-200'
+                      } bg-gray-300/5`}
                     />
+                    {renderFormError('sectorLocation')}
                   </div>
 
                   <div className="flex flex-col gap-[2px] w-[48%] min-w-[200px] mb-2">
@@ -490,10 +516,16 @@ export function UpdateSensitiveAreaButton({ sensitiveAreaDetails, fetchAllSensit
                     <input
                       type="text"
                       name="siteName"
+                      id="siteName"
                       value={formData.siteName}
                       onChange={handleInputChange}
-                      className="py-2 px-[2px] text-sm outline-none border-b-[1px] border-b-gray-200 bg-gray-300/5"
+                      className={`py-2 px-[2px] text-sm outline-none border-b-[1px] ${
+                        formErrors.siteName
+                          ? 'border-b-red-400'
+                          : 'border-b-gray-200'
+                      } bg-gray-300/5`}
                     />
+                    {renderFormError('siteName')}
                   </div>
 
                   <div className="flex flex-col gap-[2px] w-[48%] min-w-[200px] mb-2">
@@ -503,45 +535,85 @@ export function UpdateSensitiveAreaButton({ sensitiveAreaDetails, fetchAllSensit
                     <input
                       type="text"
                       name="latitude"
+                      id="latitude"
                       value={formData.latitude}
                       onChange={handleInputChange}
-                      className="py-2 px-[2px] text-sm outline-none border-b-[1px] border-b-gray-200 bg-gray-300/5"
+                      className={`py-2 px-[2px] text-sm outline-none border-b-[1px] ${
+                        formErrors.latitude
+                          ? 'border-b-red-400'
+                          : 'border-b-gray-200'
+                      } bg-gray-300/5`}
                     />
+                    {renderFormError('latitude')}
                   </div>
 
                   <div className="flex flex-col gap-[2px] w-[48%] min-w-[200px] mb-2">
-                    <label htmlFor="longitude" className="text-xs text-gray-300">
+                    <label
+                      htmlFor="longitude"
+                      className="text-xs text-gray-300"
+                    >
                       Longitude
                     </label>
                     <input
                       type="text"
                       name="longitude"
+                      id="longitude"
                       value={formData.longitude}
                       onChange={handleInputChange}
-                      className="py-2 px-[2px] text-sm outline-none border-b-[1px] border-b-gray-200 bg-gray-300/5"
+                      className={`py-2 px-[2px] text-sm outline-none border-b-[1px] ${
+                        formErrors.longitude
+                          ? 'border-b-red-400'
+                          : 'border-b-gray-200'
+                      } bg-gray-300/5`}
                     />
+                    {renderFormError('longitude')}
                   </div>
 
-                  <div className="flex flex-col gap-[2px] w-full min-w-[200px] mb-2">
-                    <label htmlFor="description" className="text-xs text-gray-300">
-                      Description
+                  <div className="flex flex-col gap-[2px] w-[48%] min-w-[200px] mb-2">
+                    <label htmlFor="azmuth" className="text-xs text-gray-300">
+                      Azmuth
                     </label>
-                    <textarea
-                      name="description"
-                      value={formData.description}
+                    <input
+                      type="text"
+                      name="azmuth"
+                      id="azmuth"
+                      value={formData.azmuth}
                       onChange={handleInputChange}
-                      className="py-2 px-[2px] text-sm outline-none border-b-[1px] border-b-gray-200 bg-gray-300/5"
+                      className={`py-2 px-[2px] text-sm outline-none border-b-[1px] ${
+                        formErrors.azmuth
+                          ? 'border-b-red-400'
+                          : 'border-b-gray-200'
+                      } bg-gray-300/5`}
                     />
+                    {renderFormError('azmuth')}
                   </div>
+                </div>
+
+                <div className="flex flex-col gap-[2px] w-[100%] min-w-[200px] mb-2">
+                  <label
+                    htmlFor="description"
+                    className="text-xs text-gray-300"
+                  >
+                    Description
+                  </label>
+                  <textarea
+                    name="description"
+                    id="description"
+                    rows={2}
+                    value={formData.description}
+                    onChange={handleInputChange}
+                    className={`py-2 px-[2px] text-sm outline-none border-b-[1px] ${
+                      formErrors.description
+                        ? 'border-b-red-400'
+                        : 'border-b-gray-200'
+                    } bg-gray-300/5`}
+                  />
+                  {renderFormError('description')}
                 </div>
 
                 <button
                   type="submit"
-                  className={`py-2 px-6 text-xs text-white rounded ${
-                    isUpdatingArea
-                      ? 'cursor-not-allowed bg-gray-600'
-                      : 'bg-mainBlue hover:bg-blue-500'
-                  }`}
+                  className="mt-3 py-1.5 px-4 bg-blue-500 rounded text-sm text-white disabled:opacity-60"
                   disabled={isUpdatingArea}
                 >
                   {isUpdatingArea ? 'Updating...' : 'Update'}
@@ -551,17 +623,20 @@ export function UpdateSensitiveAreaButton({ sensitiveAreaDetails, fetchAllSensit
           </div>
         </div>
       )}
+
       <button
-        className="btn btn-primary hover:bg-mainBlue hover:text-white rounded-[8px] py-1 px-[4px] text-mainBlue font-medium text-lg"
         onClick={() => setShowUpdateForm(true)}
+        className="py-1 px-2 text-sm  hover:bg-gray-600 rounded flex items-center gap-1"
       >
-        <FaRegEdit />
+        <FaRegEdit className="text-blue-500 bg-transparent" />
       </button>
     </div>
   );
 }
-
-export function DeleteSensitiveAreaButton({ sensitiveAreaDetails, fetchAllSensitiveAreas }) {
+export function DeleteSensitiveAreaButton({
+  sensitiveAreaDetails,
+  fetchAllSensitiveAreas,
+}) {
   const [isDeleting, setIsDeleting] = useState(false);
 
   const deleteSensitiveArea = async () => {
@@ -580,7 +655,7 @@ export function DeleteSensitiveAreaButton({ sensitiveAreaDetails, fetchAllSensit
 
       // Filter out the area to be deleted
       const updatedAreas = existingAreas.filter(
-        area => area.id !== sensitiveAreaDetails.id
+        (area) => area.id !== sensitiveAreaDetails.id
       );
 
       // Save updated areas back to localStorage
@@ -624,15 +699,18 @@ export function DeleteSensitiveAreaButton({ sensitiveAreaDetails, fetchAllSensit
   );
 }
 
-export function SensitiveAreaButtons({ sensitiveAreaDetails, fetchAllSensitiveAreas }) {
+export function SensitiveAreaButtons({
+  sensitiveAreaDetails,
+  fetchAllSensitiveAreas,
+}) {
   return (
     <div className="flex gap-2 items-center">
-      <UpdateSensitiveAreaButton 
-        sensitiveAreaDetails={sensitiveAreaDetails} 
-        fetchAllSensitiveAreas={fetchAllSensitiveAreas} 
+      <UpdateSensitiveAreaButton
+        sensitiveAreaDetails={sensitiveAreaDetails}
+        fetchAllSensitiveAreas={fetchAllSensitiveAreas}
       />
-      <DeleteSensitiveAreaButton 
-        sensitiveAreaDetails={sensitiveAreaDetails} 
+      <DeleteSensitiveAreaButton
+        sensitiveAreaDetails={sensitiveAreaDetails}
         fetchAllSensitiveAreas={fetchAllSensitiveAreas}
       />
     </div>

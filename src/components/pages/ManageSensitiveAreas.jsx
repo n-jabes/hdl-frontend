@@ -157,6 +157,7 @@ const ManageSensitiveAreas = () => {
     sectorLocation: area.sectorLocation,
     siteName: area.siteName,
     coordinates: `${area.latitude}, ${area.longitude}`,
+    azmuth: area.azmuth,
     description: area.description,
     actions: (
       <SensitiveAreaButtons
