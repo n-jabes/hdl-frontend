@@ -28,14 +28,21 @@ function MonitorSensitiveAreas(props) {
   const [isStillLoading, setIsStillLoading] = useState(false);
   const [selectedCoordinates, setSelectedCoordinates] = useState([]);
   const [siteBasedSubscribers, setSiteBasedSubscribers] = useState([]);
+  const [isFetchingSiteBasedSubscribers, setIsFetchingSiteBasedSubscribers] =
+    useState(false);
   const [subscriberCoordinates, setSubscriberCoordinates] = useState([]);
 
   const KIGALI_COORDINATES = { lat: -1.9577, lng: 30.1127 };
 
-  const handleFindSiteBasedSubscribers = () => {
-    const subs = filteredData
-      .filter((item) => item.SectorLocation === sectorLocation)
-      .map((sub, index) => ({
+  const handleFindSiteBasedSubscribers = async () => {
+    setIsFetchingSiteBasedSubscribers(true);
+    let subs;
+    try {
+      const response = await axios.get(
+        `https://hdl-backend.onrender.com/subscribers/filter/by-sector-location/${sectorLocation}`
+      );
+      // console.log('Site based response: ', response);
+      subs = response?.data?.data?.subscribers.map((sub, index) => ({
         index: ++index,
         IMSI: sub.IMSI,
         MSISDN: sub.MSISDN,
@@ -47,7 +54,24 @@ function MonitorSensitiveAreas(props) {
         Latitude: sub.Latitude,
         Longitude: sub.Longitude,
       }));
-    // console.log('Site Subs: ', filteredData);
+    } catch (error) {
+      console.log('Failed to fetch site based subscribers');
+      toast.error('Failed to fetch site based subscribers', {
+        position: 'top-right',
+        autoClose: 2000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: 'dark',
+        transition: Bounce,
+      });
+    } finally {
+      setIsFetchingSiteBasedSubscribers(false);
+    }
+
+    // console.log('Site based subs: ', subs);
 
     // Update user coordinates for map
     const coordinates = subs
@@ -59,15 +83,16 @@ function MonitorSensitiveAreas(props) {
       }))
       .filter((coord) => !isNaN(coord.lat) && !isNaN(coord.lng));
 
-      // console.log("sub coordinates", subs)
+    // console.log("sub coordinates", subs)
 
     setSubscriberCoordinates(coordinates);
     setSiteBasedSubscribers(subs);
   };
 
   useEffect(() => {
-    handleFindSiteBasedSubscribers();
-
+    if(sectorLocation != ''){
+      handleFindSiteBasedSubscribers();
+    }
   }, [sectorLocation, filteredData]);
 
   const handleFilterValueChange = (event) => {
@@ -90,7 +115,7 @@ function MonitorSensitiveAreas(props) {
     setSiteName(value);
   };
 
-  const handleSetSectorLocation= (value) => {
+  const handleSetSectorLocation = (value) => {
     setSectorLocation(value);
   };
 
@@ -126,7 +151,7 @@ function MonitorSensitiveAreas(props) {
       R: subscriber.R,
       Location: subscriber.Location,
       SiteName: subscriber.SiteName,
-      SiteName: subscriber.SiteName,
+      SectorLocation: subscriber.SectorLocation,
     }));
 
     setFilteredData(formattedData);
@@ -153,7 +178,7 @@ function MonitorSensitiveAreas(props) {
         RAC: 'Unknown',
         CI: 'Unknown',
         SiteName: 'Unknown',
-        SiteName: 'Unknown',
+        SectorLocation: 'Unknown',
         Longitude: '30.1127',
         Latitude: '-1.9577',
         Azimuth: 'Unknown',
@@ -178,7 +203,7 @@ function MonitorSensitiveAreas(props) {
           RAC: 'Unknown',
           CI: 'Unknown',
           SiteName: 'Unknown',
-          SiteName: 'Unknown',
+          SectorLocation: 'Unknown',
           Longitude: '30.1127',
           Latitude: '-1.9577',
           Azimuth: 'Unknown',
@@ -194,7 +219,7 @@ function MonitorSensitiveAreas(props) {
         RAC: 'Unknown',
         CI: 'Unknown',
         SiteName: 'Unknown',
-        SiteName: 'Unknown',
+        SectorLocation: 'Unknown',
         Longitude: '30.1127',
         Latitude: '-1.9577',
         Azimuth: 'Unknown',
@@ -295,7 +320,6 @@ function MonitorSensitiveAreas(props) {
     'IMEI',
   ];
 
-
   return (
     <div className="min-h-[85vh] h-full w-full pb-4">
       <h2 className="mb-[2px]">Monitor Sensitive Areas</h2>
@@ -345,7 +369,10 @@ function MonitorSensitiveAreas(props) {
 
             {siteName && (
               <div className="flex flex-col gap-[5px]">
-                <label htmlFor="SectorLocation" className="text-sm text-gray-400">
+                <label
+                  htmlFor="SectorLocation"
+                  className="text-sm text-gray-400"
+                >
                   Choose Sector Location
                 </label>
                 <select
@@ -368,154 +395,161 @@ function MonitorSensitiveAreas(props) {
               </div>
             )}
           </form>
-          {siteBasedSubscribers.length > 0 ? (
-            <div className="h-max pt-2 lg:h-full flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between ">
-              <div className="h-max lg:max-h-full lg:h-full w-full lg:w-3/5 flex flex-col gap-2 overflow-auto flex-shrink-0">
-                <div className="flex rounded-[5px] gap-2 flex-wrap bg-[#1A1D1F] px-2 py-3">
-                  <form
-                    action="#"
-                    className="flex flex-wrap gap-2 items-end justify-between w-full"
-                    onSubmit={(e) => {
-                      e.preventDefault();
-                      filterSubscribers();
-                    }}
-                  >
-                    <div className="flex flex-col gap-[5px]">
-                      <label htmlFor="operator" className="text-xs">
-                        Operator
-                      </label>
-                      <select
-                        name="operator"
-                        id="operator"
-                        className="w-max bg-gray-100 text-gray-700 text-xs py-[3px] px-2 outline-none rounded-[2px]"
+          {isFetchingSiteBasedSubscribers ? (
+            <p>Is Fetching site based subscribers</p>
+          ) : (
+            <div>
+              {' '}
+              {siteBasedSubscribers.length > 0 ? (
+                <div className="h-max pt-2 lg:h-full flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between ">
+                  <div className="h-max lg:max-h-full lg:h-full w-full lg:w-3/5 flex flex-col gap-2 overflow-auto flex-shrink-0">
+                    <div className="flex rounded-[5px] gap-2 flex-wrap bg-[#1A1D1F] px-2 py-3">
+                      <form
+                        action="#"
+                        className="flex flex-wrap gap-2 items-end justify-between w-full"
+                        onSubmit={(e) => {
+                          e.preventDefault();
+                          filterSubscribers();
+                        }}
                       >
-                        <option value="MTN">MTN</option>
-                        <option value="Airtel">Airtel</option>
-                        <option value="KTRN">KTRN</option>
-                      </select>
+                        <div className="flex flex-col gap-[5px]">
+                          <label htmlFor="operator" className="text-xs">
+                            Operator
+                          </label>
+                          <select
+                            name="operator"
+                            id="operator"
+                            className="w-max bg-gray-100 text-gray-700 text-xs py-[3px] px-2 outline-none rounded-[2px]"
+                          >
+                            <option value="MTN">MTN</option>
+                            <option value="Airtel">Airtel</option>
+                            <option value="KTRN">KTRN</option>
+                          </select>
+                        </div>
+                        <div className="flex flex-col gap-[5px]">
+                          <label htmlFor="fromDate" className="text-xs">
+                            From
+                          </label>
+                          <input
+                            type="datetime-local"
+                            placeholder="Start Date"
+                            value={fromDate}
+                            onChange={handleFromDateChange}
+                            className="w-max bg-gray-100 text-gray-700 py-[3px] px-2 outline-none rounded-[2px] text-xs cursor-pointer"
+                          />
+                        </div>
+                        <div className="flex flex-col gap-[5px]">
+                          <label htmlFor="toDate" className="text-xs">
+                            To
+                          </label>
+                          <input
+                            type="datetime-local"
+                            placeholder="End Date"
+                            value={toDate}
+                            onChange={handleToDateChange}
+                            className="w-max bg-gray-100 text-gray-700 py-[3px] px-2 outline-none rounded-[2px] text-xs cursor-pointer"
+                          />
+                        </div>
+                        <button
+                          type="submit"
+                          className="py-[6px] px-6 text-xs bg-mainBlue hover:bg-blue-500 text-white rounded"
+                        >
+                          Filter
+                        </button>
+                      </form>
                     </div>
-                    <div className="flex flex-col gap-[5px]">
-                      <label htmlFor="fromDate" className="text-xs">
-                        From
-                      </label>
-                      <input
-                        type="datetime-local"
-                        placeholder="Start Date"
-                        value={fromDate}
-                        onChange={handleFromDateChange}
-                        className="w-max bg-gray-100 text-gray-700 py-[3px] px-2 outline-none rounded-[2px] text-xs cursor-pointer"
-                      />
-                    </div>
-                    <div className="flex flex-col gap-[5px]">
-                      <label htmlFor="toDate" className="text-xs">
-                        To
-                      </label>
-                      <input
-                        type="datetime-local"
-                        placeholder="End Date"
-                        value={toDate}
-                        onChange={handleToDateChange}
-                        className="w-max bg-gray-100 text-gray-700 py-[3px] px-2 outline-none rounded-[2px] text-xs cursor-pointer"
-                      />
-                    </div>
-                    <button
-                      type="submit"
-                      className="py-[6px] px-6 text-xs bg-mainBlue hover:bg-blue-500 text-white rounded"
-                    >
-                      Filter
-                    </button>
-                  </form>
-                </div>
-                {/* table */}
-                <div className="flex rounded-[5px] gap-2 flex-wrap bg-[#1A1D1F] px-4 py-3">
-                  {/* filters */}
-                  <form
-                    action="#"
-                    className="flex gap-2 flex-wrap items-end justify-between w-full"
-                    onSubmit={(e) => {
-                      e.preventDefault();
-                      filterSubscribers();
-                    }}
-                  >
-                    <div className="flex flex-col gap-[5px]">
-                      <label htmlFor="subscriber" className="text-xs">
-                        Subscriber
-                      </label>
-                      <select
-                        name="subscriber"
-                        id="subscriber"
-                        value={filterType}
-                        onChange={handleFilterTypeChange}
-                        className="w-max bg-gray-100 text-gray-700 text-xs py-[3px] px-2 outline-none rounded-[2px]"
+                    {/* table */}
+                    <div className="flex rounded-[5px] gap-2 flex-wrap bg-[#1A1D1F] px-4 py-3">
+                      {/* filters */}
+                      <form
+                        action="#"
+                        className="flex gap-2 flex-wrap items-end justify-between w-full"
+                        onSubmit={(e) => {
+                          e.preventDefault();
+                          filterSubscribers();
+                        }}
                       >
-                        <option value="IMSI">IMSI</option>
-                        <option value="MSISDN">MSISDN</option>
-                        <option value="IMEI">IMEI</option>
-                      </select>
+                        <div className="flex flex-col gap-[5px]">
+                          <label htmlFor="subscriber" className="text-xs">
+                            Subscriber
+                          </label>
+                          <select
+                            name="subscriber"
+                            id="subscriber"
+                            value={filterType}
+                            onChange={handleFilterTypeChange}
+                            className="w-max bg-gray-100 text-gray-700 text-xs py-[3px] px-2 outline-none rounded-[2px]"
+                          >
+                            <option value="IMSI">IMSI</option>
+                            <option value="MSISDN">MSISDN</option>
+                            <option value="IMEI">IMEI</option>
+                          </select>
+                        </div>
+
+                        <div className="relative w-2/5">
+                          {/* <IoIosSearch className="absolute top-1/2 left-3 transform -translate-y-1/2 text-gray-500" /> */}
+                          <input
+                            type="text"
+                            value={filterValue}
+                            onChange={handleFilterValueChange}
+                            placeholder={`Filter by ${filterType}`}
+                            className="w-full bg-gray-100 text-gray-700 py-[5px] pl-10 pr-3 outline-none rounded-[2px] text-xs"
+                          />
+                        </div>
+
+                        <button
+                          type="button"
+                          onClick={filterSubscribers}
+                          className="py-[6px] text-xs px-6 bg-mainBlue hover:bg-blue-500 text-white rounded"
+                        >
+                          Apply
+                        </button>
+
+                        <button
+                          type="button"
+                          onClick={handleClearAll}
+                          className="py-[6px] px-6 text-xs bg-gray-600 hover:bg-gray-700 text-gray-300 rounded"
+                        >
+                          Clear All
+                        </button>
+                      </form>
                     </div>
-
-                    <div className="relative w-2/5">
-                      {/* <IoIosSearch className="absolute top-1/2 left-3 transform -translate-y-1/2 text-gray-500" /> */}
-                      <input
-                        type="text"
-                        value={filterValue}
-                        onChange={handleFilterValueChange}
-                        placeholder={`Filter by ${filterType}`}
-                        className="w-full bg-gray-100 text-gray-700 py-[5px] pl-10 pr-3 outline-none rounded-[2px] text-xs"
-                      />
-                    </div>
-
-                    <button
-                      type="button"
-                      onClick={filterSubscribers}
-                      className="py-[6px] text-xs px-6 bg-mainBlue hover:bg-blue-500 text-white rounded"
-                    >
-                      Apply
-                    </button>
-
-                    <button
-                      type="button"
-                      onClick={handleClearAll}
-                      className="py-[6px] px-6 text-xs bg-gray-600 hover:bg-gray-700 text-gray-300 rounded"
-                    >
-                      Clear All
-                    </button>
-                  </form>
-                </div>
-                <SensitiveAreasTable
-                  tableData={siteBasedSubscribers}
-                  isFetchingSubscribers={isFetchingSubscribers}
-                  onRowClick={handleRowClick}
-                  headers={sensitiveAreasHeaders}
-                  siteCoordinates={KIGALI_COORDINATES}
-                />
-              </div>
-              <div className="h-[300px] lg:min-h-[90vh] w-full lg:w-2/5 flex justify-center items-center bg-red-200">
-                {isStillLoading ? (
-                  <div className="my-[15vh] flex flex-col gap-2 items-center">
-                    <h2 className="text-gray-600 text-xs w-2/3 text-center mt-4">
-                      Performing a background fetch, please wait until the fetch
-                      is done to see all data
-                    </h2>
-                  </div>
-                ) : (
-                  <div className="w-full h-full">
-                    <SensitiveAreasMap 
-                      subscriberCoordinates={subscriberCoordinates} 
+                    <SensitiveAreasTable
+                      tableData={siteBasedSubscribers}
+                      isFetchingSubscribers={isFetchingSubscribers}
+                      onRowClick={handleRowClick}
+                      headers={sensitiveAreasHeaders}
+                      siteCoordinates={KIGALI_COORDINATES}
                     />
                   </div>
-                )}
-              </div>
+                  <div className="h-[300px] lg:min-h-[90vh] w-full lg:w-2/5 flex justify-center items-center bg-red-200">
+                    {isStillLoading ? (
+                      <div className="my-[15vh] flex flex-col gap-2 items-center">
+                        <h2 className="text-gray-600 text-xs w-2/3 text-center mt-4">
+                          Performing a background fetch, please wait until the
+                          fetch is done to see all data
+                        </h2>
+                      </div>
+                    ) : (
+                      <div className="w-full h-full">
+                        <SensitiveAreasMap
+                          subscriberCoordinates={subscriberCoordinates}
+                        />
+                      </div>
+                    )}
+                  </div>
+                </div>
+              ) : (
+                <h2 className="text-gray-400 mt-2">
+                  Please select a site name
+                </h2>
+              )}
             </div>
-          ) : (
-            <h2 className="text-gray-400 mt-2">Please select a site name</h2>
           )}
         </div>
       ) : (
         <div className="w-full h-[90%]">
-          <SensitiveAreasMap 
-            subscriberCoordinates={subscriberCoordinates} 
-          />
+          <SensitiveAreasMap subscriberCoordinates={subscriberCoordinates} />
         </div>
       )}
     </div>
