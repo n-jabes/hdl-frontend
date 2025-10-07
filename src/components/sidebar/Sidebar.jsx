@@ -69,7 +69,7 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
     <div
       className={`fixed top-0 left-0 h-full bg-mainBlack text-white border-r-[1px] border-r-gray-700 w-64 transform overflow-y-auto ${
         isOpen ? 'translate-x-0' : '-translate-x-full'
-      } lg:translate-x-0 transition-transform duration-300 ease-in-out z-40 shadow-lg`}
+      } lg:translate-x-0 transition-transform duration-300 ease-in-out z-40 shadow-lg focus:outline-none`}
     >
       <Link
         to="/"
@@ -93,10 +93,10 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
         <li>
           <Link
             to="/"
-            className={`flex items-center px-4 py-3 ${
+            className={`flex items-center px-4 py-3 rounded-l-[5px] ${
               isActive('/')
-                ? 'bg-gray-700 rounded-l-[5px]'
-                : 'hover:bg-gray-700 hover:rounded-l-[5px]'
+                ? 'bg-gray-700'
+                : 'hover:bg-gray-700 focus-visible:ring-2 focus-visible:ring-mainBlue'
             }`}
           >
             <MdDashboard className="mr-3 h-4 w-4" />
@@ -108,11 +108,11 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
         <li>
           <div
             onClick={handleToggle(setLocationDropdownOpen)}
-            className={`flex items-center px-4 py-3 ${
+            className={`flex items-center px-4 py-3 rounded-l-[5px] ${
               location.pathname.includes('/targeted-subscriber') ||
               location.pathname.includes('/massive-subscribers')
-                ? 'text-gray-400 rounded-l-[5px]'
-                : 'hover:bg-gray-700 hover:rounded-l-[5px]'
+                ? 'text-gray-400'
+                : 'hover:bg-gray-700 focus-visible:ring-2 focus-visible:ring-mainBlue'
             } cursor-pointer`}
           >
             <FaMapLocationDot className="mr-3 w-4 h-4" />
@@ -128,10 +128,10 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
               <li>
                 <Link
                   to="/manage-targeted-subscribers"
-                  className={`flex items-center px-4 py-2 ${
+                  className={`flex items-center px-4 py-2 rounded-l-[5px] ${
                     isActive('/manage-targeted-subscribers')
-                      ? 'bg-gray-700 rounded-l-[5px]'
-                      : 'hover:bg-gray-700 hover:rounded-l-[5px]'
+                      ? 'bg-gray-700'
+                      : 'hover:bg-gray-700 focus-visible:ring-2 focus-visible:ring-mainBlue'
                   }`}
                 >
                   <ManageAccountsIcon className="mr-3 h-4 w-4" />
@@ -141,10 +141,10 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
               <li>
                 <Link
                   to="/targeted-subscriber"
-                  className={`flex items-center px-4 py-2 ${
+                  className={`flex items-center px-4 py-2 rounded-l-[5px] ${
                     isActive('/targeted-subscriber')
-                      ? 'bg-gray-700 rounded-l-[5px]'
-                      : 'hover:bg-gray-700 hover:rounded-l-[5px]'
+                      ? 'bg-gray-700'
+                      : 'hover:bg-gray-700 focus-visible:ring-2 focus-visible:ring-mainBlue'
                   }`}
                 >
                   <RiUserLocationFill className="mr-3 h-4 w-4" />
@@ -154,10 +154,10 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
               <li>
                 <Link
                   to="/massive-subscribers"
-                  className={`flex items-center px-4 py-2 ${
+                  className={`flex items-center px-4 py-2 rounded-l-[5px] ${
                     isActive('/massive-subscribers')
-                      ? 'bg-gray-700 rounded-l-[5px]'
-                      : 'hover:bg-gray-700 hover:rounded-l-[5px]'
+                      ? 'bg-gray-700'
+                      : 'hover:bg-gray-700 focus-visible:ring-2 focus-visible:ring-mainBlue'
                   }`}
                 >
                   <FiUsers className="mr-3 w-4 h-4" />
@@ -173,11 +173,11 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
         <li>
           <div
             onClick={handleToggle(setDeviceTracing)}
-            className={`flex items-center px-4 py-3 ${
+            className={`flex items-center px-4 py-3 rounded-l-[5px] ${
               location.pathname.includes('/manage-devices') ||
               location.pathname.includes('/monitor-devices')
-                ? 'text-gray-400 rounded-l-[5px]'
-                : 'hover:bg-gray-700 hover:rounded-l-[5px]'
+                ? 'text-gray-400'
+                : 'hover:bg-gray-700 focus-visible:ring-2 focus-visible:ring-mainBlue'
             } cursor-pointer`}
           >
             <img
@@ -197,10 +197,10 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
               <li>
                 <Link
                   to="/manage-devices"
-                  className={`flex items-center px-4 py-2 ${
+                  className={`flex items-center px-4 py-2 rounded-l-[5px] ${
                     isActive('/manage-devices')
-                      ? 'bg-gray-700 rounded-l-[5px]'
-                      : 'hover:bg-gray-700 hover:rounded-l-[5px]'
+                      ? 'bg-gray-700'
+                      : 'hover:bg-gray-700 focus-visible:ring-2 focus-visible:ring-mainBlue'
                   }`}
                 >
                   <DevicesOtherIcon className="mr-3" sx={{ fontSize: 18 }} />
@@ -210,10 +210,10 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
               <li>
                 <Link
                   to="/monitor-devices"
-                  className={`flex items-center px-4 py-2 ${
+                  className={`flex items-center px-4 py-2 rounded-l-[5px] ${
                     isActive('/monitor-devices')
-                      ? 'bg-gray-700 rounded-l-[5px]'
-                      : 'hover:bg-gray-700 hover:rounded-l-[5px]'
+                      ? 'bg-gray-700'
+                      : 'hover:bg-gray-700 focus-visible:ring-2 focus-visible:ring-mainBlue'
                   }`}
                 >
                   <TrackChangesIcon className="mr-3" sx={{ fontSize: 18 }} />
@@ -228,10 +228,10 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
         <li>
           <Link
             to="/emergency-alert"
-            className={`flex items-center px-4 py-3 ${
+            className={`flex items-center px-4 py-3 rounded-l-[5px] ${
               isActive('/emergency-alert')
-                ? 'bg-gray-700 rounded-l-[5px]'
-                : 'hover:bg-gray-700 hover:rounded-l-[5px]'
+                ? 'bg-gray-700'
+                : 'hover:bg-gray-700 focus-visible:ring-2 focus-visible:ring-mainBlue'
             }`}
           >
             <MdEmergencyShare className="mr-3 h-4 w-4" />
@@ -243,11 +243,11 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
         <li>
           <div
             onClick={handleToggle(setSensitiveAreasDropdownOpen)}
-            className={`flex items-center px-4 py-3 ${
+            className={`flex items-center px-4 py-3 rounded-l-[5px] ${
               location.pathname.includes('/add-sensitive-area') ||
               location.pathname.includes('/monitor-sensitive-area')
-                ? 'text-gray-400 rounded-l-[5px]'
-                : 'hover:bg-gray-700 hover:rounded-l-[5px]'
+                ? 'text-gray-400'
+                : 'hover:bg-gray-700 focus-visible:ring-2 focus-visible:ring-mainBlue'
             } cursor-pointer`}
           >
             <MdWarning className="mr-3 w-4 h-4" />
@@ -263,10 +263,10 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
               <li>
                 <Link
                   to="/manage-sensitive-areas"
-                  className={`flex items-center px-4 py-2 ${
+                  className={`flex items-center px-4 py-2 rounded-l-[5px] ${
                     isActive('/manage-sensitive-areas')
-                      ? 'bg-gray-700 rounded-l-[5px]'
-                      : 'hover:bg-gray-700 hover:rounded-l-[5px]'
+                      ? 'bg-gray-700'
+                      : 'hover:bg-gray-700 focus-visible:ring-2 focus-visible:ring-mainBlue'
                   }`}
                 >
                   <LocationDisabledIcon
@@ -279,10 +279,10 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
               <li>
                 <Link
                   to="/monitor-sensitive-area"
-                  className={`flex items-center px-4 py-2 ${
+                  className={`flex items-center px-4 py-2 rounded-l-[5px] ${
                     isActive('/monitor-sensitive-area')
-                      ? 'bg-gray-700 rounded-l-[5px]'
-                      : 'hover:bg-gray-700 hover:rounded-l-[5px]'
+                      ? 'bg-gray-700'
+                      : 'hover:bg-gray-700 focus-visible:ring-2 focus-visible:ring-mainBlue'
                   }`}
                 >
                   <LuMonitorX className="mr-3 w-4 h-5" />
