@@ -14,11 +14,11 @@ const Header = ({ toggleSidebar }) => {
           <VscBell className="h-5 w-5 cursor-pointer" />
           <div className="flex items-center gap-2 cursor-pointer">
             <img
-              src="/profile.webp"
+              src="/profile.jpeg"
               className="border-[1px] border-gray-700 rounded-full h-10 w-10"
               alt="Profile"
             />
-            <h2 className="hidden lg:block text-sm">Murekezi Jean</h2>
+            <h2 className="hidden lg:block text-sm">Ndahiriwe Patrick</h2>
           </div>
         </div>
       </div>

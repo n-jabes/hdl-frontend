@@ -329,9 +329,10 @@ const MassiveSubscribers = () => {
                 id="operator"
                 className="w-max bg-gray-100 text-gray-700 text-xs py-[3px] px-2 outline-none rounded-[2px]"
               >
-                <option value="MTN">MTN</option>
+                <option value="Orange">Orange</option>
                 <option value="Airtel">Airtel</option>
-                <option value="KTRN">KTRN</option>
+                <option value="Vodacom">Vodacom</option>
+                <option value="Africel">Africel</option>
               </select>
             </div>
             <div className="flex flex-col gap-[5px]">

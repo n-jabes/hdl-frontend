@@ -335,8 +335,9 @@ const TargetedSubscriber = () => {
                     id="operator"
                     className="w-max bg-gray-100 text-gray-700 text-xs py-[3px] px-2 outline-none rounded-[2px]"
                   >
-                    <option value="MTN">MTN</option>
+                    <option value="Orange">Orange</option>
                     <option value="AIRTEL">AIRTEL</option>
+                    <option value="Africel">Africel</option>
                   </select>
                 </div>
 
