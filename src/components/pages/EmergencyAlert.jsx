@@ -34,13 +34,13 @@ const EmergencyAlert = () => {
             </select>
           </div>
           <div className="relative">
-            <IoIosSearch className="absolute top-1/2 left-3 transform -translate-y-1/2 text-gray-500" />
+            <IoIosSearch className="absolute top-1/2 right-3 transform -translate-y-1/2 text-gray-500" />
             <input
               type="text"
               value={filterValue}
               onChange={handleFilterValueChange}
               placeholder={`Filter by ${filterType}`}
-              className="w-full text-gray-500 py-[4px] pl-10 pr-3 outline-none rounded-[2px] text-sm"
+              className="w-full text-gray-500 py-[4px] pl-3 pr-10 outline-none rounded-[2px] text-sm"
             />
           </div>
 

@@ -6,8 +6,9 @@
 
 body {
   font-family: 'Poppins', sans-serif;
-  background: #111315;
-  color: white;
+  /* Subtle vignette gradient for depth */
+  background: radial-gradient(1200px 600px at 10% 0%, #0d0f11 0%, #0f1113 30%, #0b0d0f 100%);
+  color: #E5E7EB;
 }
 
 /* Global, consistent form styles */
