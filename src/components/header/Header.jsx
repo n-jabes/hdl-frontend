@@ -18,7 +18,7 @@ const Header = ({ toggleSidebar }) => {
               className="border-[1px] border-gray-700 rounded-full h-10 w-10 object-cover"
               alt="Profile"
             />
-            <h2 className="hidden lg:block text-sm">Ndahiriwe Patrick</h2>
+            <h2 className="hidden lg:block text-sm">Muhizi Ernest</h2>
           </div>
         </div>
       </div>
