@@ -14,7 +14,7 @@ const Header = ({ toggleSidebar }) => {
           <VscBell className="h-5 w-5 cursor-pointer hover:text-gray-300 transition" />
           <div className="flex items-center gap-2 cursor-pointer">
             <img
-              src="/profile.jpeg"
+              src="/profile.webp"
               className="border-[1px] border-gray-700 rounded-full h-10 w-10 object-cover"
               alt="Profile"
             />
