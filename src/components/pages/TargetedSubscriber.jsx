@@ -1,32 +1,32 @@
-import React, { useState, useEffect } from 'react';
-import { IoIosSearch } from 'react-icons/io';
-import axios from 'axios';
-import TableTemplate from '../tableTemplate/TableTemplate';
-import GoogleMapsEmbed from '../mapComponent/GoogleMapsEmbed';
-import { Bounce, toast } from 'react-toastify';
+import React, { useState, useEffect } from "react";
+import { IoIosSearch } from "react-icons/io";
+import axios from "axios";
+import TableTemplate from "../tableTemplate/TableTemplate";
+import GoogleMapsEmbed from "../mapComponent/GoogleMapsEmbed";
+import { Bounce, toast } from "react-toastify";
 
 const formatDateToYMDHM = (dateString) => {
   const date = new Date(dateString);
-  return `${String(date.getMonth() + 1).padStart(2, '0')}/${String(
-    date.getDate()
-  ).padStart(2, '0')}/${date.getFullYear()} ${String(date.getHours()).padStart(
-    '2',
-    '0'
-  )}:${String(date.getMinutes()).padStart(2, '0')}`;
+  return `${String(date.getMonth() + 1).padStart(2, "0")}/${String(
+    date.getDate(),
+  ).padStart(2, "0")}/${date.getFullYear()} ${String(date.getHours()).padStart(
+    "2",
+    "0",
+  )}:${String(date.getMinutes()).padStart(2, "0")}`;
 };
 
 const TargetedSubscriber = () => {
-  const [filterType, setFilterType] = useState('IMSI');
-  const [filterValue, setFilterValue] = useState('');
-  const [fromDate, setFromDate] = useState('');
-  const [toDate, setToDate] = useState('');
+  const [filterType, setFilterType] = useState("IMSI");
+  const [filterValue, setFilterValue] = useState("");
+  const [fromDate, setFromDate] = useState("");
+  const [toDate, setToDate] = useState("");
   const [allSubscribers, setAllSubscribers] = useState([]);
-  const [targetedSubscriber, setTargetedSubscriber] = useState('');
+  const [targetedSubscriber, setTargetedSubscriber] = useState("");
   const [filteredData, setFilteredData] = useState([]);
   const [isFetchingSubscribers, setIsFetchingSubscribers] = useState(false);
   const [isStillLoading, setIsStillLoading] = useState(false);
   const [selectedCoordinates, setSelectedCoordinates] = useState([]);
-  const [errorMessage, setErrorMessage] = useState('');
+  const [errorMessage, setErrorMessage] = useState("");
 
   const KIGALI_COORDINATES = { lat: -1.9577, lng: 30.1127 };
 
@@ -47,13 +47,13 @@ const TargetedSubscriber = () => {
   };
 
   const getLocationDetails = async (locationCode) => {
-    const parts = locationCode.split('-');
+    const parts = locationCode.split("-");
     const ci = parts[parts.length - 1];
 
     try {
       // implement logic here
     } catch (error) {
-      console.log('Failed to get location details: ', error);
+      console.log("Failed to get location details: ", error);
     }
   };
 
@@ -62,11 +62,56 @@ const TargetedSubscriber = () => {
     setIsStillLoading(true);
     try {
       const response = await axios.get(
-        'https://hdl-backend.onrender.com/subscribers/subscriber-location'
+        "https://hdl-backend.onrender.com/subscribers/subscriber-location",
       );
-      setAllSubscribers(response?.data?.data?.subscribers);
+
+      //original
+      // setAllSubscribers(response?.data?.data?.subscribers);
+
+      const subscribers = response?.data?.data?.subscribers;
+      console.log("All subscribers: ", subscribers);
+
+      //FORMATTED DISPLAY FOR TANZANIA DEMO
+      const formattedData = subscribers.map((subscriber, index) => {
+        // Update Location
+        const formattedLocation =
+          subscriber.Location && subscriber.Location !== "?"
+            ? subscriber.Location.replace(/^635-10/, "640-02")
+            : subscriber.Location;
+
+        // Update IMSI
+        const formattedIMSI = subscriber.IMSI
+          ? subscriber.IMSI.replace(/^63510/, "64002")
+          : subscriber.IMSI;
+
+        // Update MSISDN
+        const formattedMSISDN = subscriber.MSISDN
+          ? subscriber.MSISDN.replace(/^250/, "255")
+          : subscriber.MSISDN;
+
+        return {
+          id: index + 1,
+          count: index + 1,
+          startTime: formatDateToYMDHM(subscriber.startTime),
+
+          IMSI: formattedIMSI,
+          MSISDN: formattedMSISDN,
+
+          maskedMSISDN: "*******",
+          IMEI: subscriber.IMEI,
+          MM: subscriber.MM,
+          R: subscriber.R,
+
+          Location: formattedLocation,
+
+          SiteName: subscriber?.matchingCoreArea?.SiteName,
+          SectorLocation: subscriber?.matchingCoreArea?.SectorLocation,
+        };
+      });
+
+      setAllSubscribers(formattedData);
     } catch (error) {
-      console.log('Failed to fetch subscribers', error);
+      console.log("Failed to fetch subscribers", error);
     } finally {
       setIsFetchingSubscribers(false);
       setIsStillLoading(false);
@@ -81,7 +126,7 @@ const TargetedSubscriber = () => {
     //avoid sending error messages when the system is still loading all subscribers
     if (isStillLoading) {
       alert(
-        "We are still retriving all subscribers, please click 'Apply' again!"
+        "We are still retriving all subscribers, please click 'Apply' again!",
       );
     } else {
       let filtered;
@@ -90,11 +135,11 @@ const TargetedSubscriber = () => {
         setIsFetchingSubscribers(true);
         try {
           const response = await axios.get(
-            `https://hdl-backend.onrender.com/subscribers/subscriber-filter/${filterType}/${filterValue}`
+            `https://hdl-backend.onrender.com/subscribers/subscriber-filter/${filterType}/${filterValue}`,
           );
-  
+
           // console.log('response: ', response?.data?.data?.subscribers);
-  
+
           filtered = response?.data?.data?.subscribers.map(
             (subscriber, index) => ({
               id: index + 1,
@@ -102,44 +147,44 @@ const TargetedSubscriber = () => {
               startTime: formatDateToYMDHM(subscriber.startTime),
               IMSI: subscriber.IMSI,
               MSISDN: subscriber.MSISDN,
-              maskedMSISDN: '*******',
+              maskedMSISDN: "*******",
               IMEI: subscriber.IMEI,
               MM: subscriber.MM,
               R: subscriber.R,
               Location: subscriber.Location,
               SiteName: subscriber?.matchingCoreArea?.SiteName,
               SectorLocation: subscriber?.matchingCoreArea?.SectorLocation,
-            })
+            }),
           );
-  
+
           if (response?.data?.data.subscribers.length < 1) {
             // setError(`No results for subscriber with ${filterType} = ${filterValue}`)
             toast.info(
               `No results for subscriber with ${filterType} = ${filterValue}`,
               {
-                position: 'top-right',
+                position: "top-right",
                 autoClose: 2500,
                 hideProgressBar: false,
                 closeOnClick: true,
                 pauseOnHover: true,
                 draggable: true,
                 progress: undefined,
-                theme: 'light',
+                theme: "light",
                 transition: Bounce,
-              }
+              },
             );
           }
         } catch (error) {
-          console.log('error: ', error);
+          console.log("error: ", error);
           toast.error(error?.message, {
-            position: 'top-right',
+            position: "top-right",
             autoClose: 1000,
             hideProgressBar: false,
             closeOnClick: true,
             pauseOnHover: true,
             draggable: true,
             progress: undefined,
-            theme: 'dark',
+            theme: "dark",
             transition: Bounce,
           });
         } finally {
@@ -154,7 +199,7 @@ const TargetedSubscriber = () => {
         startTime: formatDateToYMDHM(subscriber.startTime),
         IMSI: subscriber.IMSI,
         MSISDN: subscriber.MSISDN,
-        maskedMSISDN: '*******',
+        maskedMSISDN: "*******",
         IMEI: subscriber.IMEI,
         MM: subscriber.MM,
         R: subscriber.R,
@@ -163,12 +208,12 @@ const TargetedSubscriber = () => {
 
       if (formattedData.length <= 0) {
         setErrorMessage(
-          `Subscriber with ${filterType}: ${filterValue} not found`
+          `Subscriber with ${filterType}: ${filterValue} not found`,
         );
-        setTargetedSubscriber('');
+        setTargetedSubscriber("");
       } else {
         setFilteredData(formattedData);
-        setErrorMessage(''); // Clear error message when data is found
+        setErrorMessage(""); // Clear error message when data is found
       }
     }
   };
@@ -178,20 +223,20 @@ const TargetedSubscriber = () => {
 
     if (filterValue) {
       filtered = allSubscribers.filter((subscriber) =>
-        subscriber[filterType].includes(filterValue)
+        subscriber[filterType].includes(filterValue),
       );
       setTargetedSubscriber(filterValue);
     }
 
     if (fromDate) {
       filtered = filtered.filter(
-        (subscriber) => new Date(subscriber.startTime) >= new Date(fromDate)
+        (subscriber) => new Date(subscriber.startTime) >= new Date(fromDate),
       );
     }
 
     if (toDate) {
       filtered = filtered.filter(
-        (subscriber) => new Date(subscriber.startTime) <= new Date(toDate)
+        (subscriber) => new Date(subscriber.startTime) <= new Date(toDate),
       );
     }
 
@@ -201,7 +246,7 @@ const TargetedSubscriber = () => {
       startTime: formatDateToYMDHM(subscriber.startTime),
       IMSI: subscriber.IMSI,
       MSISDN: subscriber.MSISDN,
-      maskedMSISDN: '*******',
+      maskedMSISDN: "*******",
       IMEI: subscriber.IMEI,
       MM: subscriber.MM,
       R: subscriber.R,
@@ -212,34 +257,34 @@ const TargetedSubscriber = () => {
   };
 
   const handleClearAll = () => {
-    setFilterValue('');
-    setFilterType('IMSI');
-    setFromDate('');
-    setToDate('');
+    setFilterValue("");
+    setFilterType("IMSI");
+    setFromDate("");
+    setToDate("");
     setFilteredData([]);
-    setTargetedSubscriber('');
-    setErrorMessage(''); // Clear error message when clearing filters
+    setTargetedSubscriber("");
+    setErrorMessage(""); // Clear error message when clearing filters
   };
 
   const extractCI = (location) => {
-    if (!location || location === '?') {
-      console.log('Invalid location');
+    if (!location || location === "?") {
+      console.log("Invalid location");
       return null;
     }
-    const parts = location.split('-');
+    const parts = location.split("-");
     return parts[parts.length - 1];
   };
 
   const handleRowClick = (subscriber) => {
     const selectedMSISDN = subscriber.MSISDN;
 
-    console.log('Clicked row: ', selectedMSISDN);
+    console.log("Clicked row: ", selectedMSISDN);
     const CIs = filteredData
       .filter((row) => row.MSISDN === selectedMSISDN)
       .map((row) => extractCI(row.Location))
       .filter((ci) => ci !== null);
 
-    console.log('CIs:', CIs);
+    console.log("CIs:", CIs);
 
     const BK_ARENA_COORDINATES = { lat: -1.9441, lng: 30.0619 };
     const coordinates = [
@@ -291,7 +336,7 @@ const TargetedSubscriber = () => {
                 onChange={handleFilterValueChange}
                 placeholder={`Filter by ${filterType}`}
                 className={`w-full bg-gray-100 text-gray-700 py-[5px] pl-3 pr-10 outline-none rounded-[2px] text-xs ${
-                  !targetedSubscriber && 'border-[2px] border-mainBlue'
+                  !targetedSubscriber && "border-[2px] border-mainBlue"
                 }`}
               />
             </div>
@@ -335,9 +380,25 @@ const TargetedSubscriber = () => {
                     id="operator"
                     className="w-max bg-gray-100 text-gray-700 text-xs py-[3px] px-2 outline-none rounded-[2px]"
                   >
-                    <option value="Orange">Orange</option>
-                    <option value="AIRTEL">AIRTEL</option>
-                    <option value="Africel">Africel</option>
+                    <option value="TIGO/MIC">TIGO/MIC</option>
+                    <option value="Zantel/Zanzibar Telecom">
+                      Zantel/Zanzibar Telecom
+                    </option>
+                    <option value="Vodacom Ltd">Vodacom Ltd</option>
+                    <option value="ZAIN/Celtel">ZAIN/Celtel</option>
+                    <option value="Dovetel (T) Ltd">Dovetel (T) Ltd</option>
+                    <option value="Tanzania Telecommunications Company Ltd (TTCL)">
+                      Tanzania Telecommunications Company Ltd (TTCL)
+                    </option>
+                    <option value="Benson Informatics Ltd">
+                      Benson Informatics Ltd
+                    </option>
+                    <option value="ExcellentCom (T) Ltd">
+                      ExcellentCom (T) Ltd
+                    </option>
+                    <option value="Smile Communications Tanzania Ltd">
+                      Smile Communications Tanzania Ltd
+                    </option>
                   </select>
                 </div>
 
@@ -401,7 +462,7 @@ const TargetedSubscriber = () => {
             {errorMessage ? (
               <span className="text-xs text-red-300">{errorMessage}</span>
             ) : (
-              'Enter a subscriber above to filter results.'
+              "Enter a subscriber above to filter results."
             )}
           </h3>
         )}
