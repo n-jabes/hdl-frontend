@@ -4,6 +4,10 @@ import axios from "axios";
 import TableTemplate from "../tableTemplate/TableTemplate";
 import GoogleMapsEmbed from "../mapComponent/GoogleMapsEmbed";
 import { Bounce, toast } from "react-toastify";
+import {
+  mapSubscribersForDisplay,
+  toBackendFilterValue,
+} from "../../utils/subscriberDisplay";
 
 const formatDateToYMDHM = (dateString) => {
   const date = new Date(dateString);
@@ -124,59 +128,10 @@ const MassiveSubscribers = () => {
       const subscribers = subscribersResponse?.data?.data?.subscribers;
       console.log("All subscribers: ", subscribers);
 
-      //FORMATTED DISPLAY FOR TANZANIA DEMO
-      const formattedData = subscribers.map((subscriber, index) => {
-        // Update Location
-        const formattedLocation =
-          subscriber.Location && subscriber.Location !== "?"
-            ? subscriber.Location.replace(/^635-10/, "640-02")
-            : subscriber.Location;
-
-        // Update IMSI
-        const formattedIMSI = subscriber.IMSI
-          ? subscriber.IMSI.replace(/^63510/, "64002")
-          : subscriber.IMSI;
-
-        // Update MSISDN
-        const formattedMSISDN = subscriber.MSISDN
-          ? subscriber.MSISDN.replace(/^250/, "255")
-          : subscriber.MSISDN;
-
-        return {
-          id: index + 1,
-          count: index + 1,
-          startTime: formatDateToYMDHM(subscriber.startTime),
-
-          IMSI: formattedIMSI,
-          MSISDN: formattedMSISDN,
-
-          maskedMSISDN: "*******",
-          IMEI: subscriber.IMEI,
-          MM: subscriber.MM,
-          R: subscriber.R,
-
-          Location: formattedLocation,
-
-          SiteName: subscriber?.matchingCoreArea?.SiteName,
-          SectorLocation: subscriber?.matchingCoreArea?.SectorLocation,
-        };
-      });
-
-      //ORIGINAL DISPLAY
-      // const formattedData = subscribers.map((subscriber, index) => ({
-      //   id: index + 1,
-      //   count: index + 1,
-      //   startTime: formatDateToYMDHM(subscriber.startTime),
-      //   IMSI: subscriber.IMSI,
-      //   MSISDN: subscriber.MSISDN,
-      //   maskedMSISDN: "*******",
-      //   IMEI: subscriber.IMEI,
-      //   MM: subscriber.MM,
-      //   R: subscriber.R,
-      //   Location: subscriber.Location,
-      //   SiteName: subscriber?.matchingCoreArea?.SiteName,
-      //   SectorLocation: subscriber?.matchingCoreArea?.SectorLocation,
-      // }));
+      const formattedData = mapSubscribersForDisplay(
+        subscribers,
+        formatDateToYMDHM,
+      );
 
       setAllSubscribers(formattedData);
       setFilteredData(formattedData);
@@ -215,27 +170,14 @@ const MassiveSubscribers = () => {
     if (filterValue) {
       setIsFetchingSubscribers(true);
       try {
+        const backendFilterValue = toBackendFilterValue(filterType, filterValue);
         const response = await axios.get(
-          `https://hdl-backend.onrender.com/subscribers/subscriber-filter/${filterType}/${filterValue}`,
+          `https://hdl-backend.onrender.com/subscribers/subscriber-filter/${filterType}/${backendFilterValue}`,
         );
 
-        // console.log('response: ', response?.data?.data?.subscribers);
-
-        filtered = response?.data?.data?.subscribers.map(
-          (subscriber, index) => ({
-            id: index + 1,
-            count: index + 1,
-            startTime: formatDateToYMDHM(subscriber.startTime),
-            IMSI: subscriber.IMSI,
-            MSISDN: subscriber.MSISDN,
-            maskedMSISDN: "*******",
-            IMEI: subscriber.IMEI,
-            MM: subscriber.MM,
-            R: subscriber.R,
-            Location: subscriber.Location,
-            SiteName: subscriber?.matchingCoreArea?.SiteName,
-            SectorLocation: subscriber?.matchingCoreArea?.SectorLocation,
-          }),
+        filtered = mapSubscribersForDisplay(
+          response?.data?.data?.subscribers ?? [],
+          formatDateToYMDHM,
         );
 
         if (response?.data?.data.subscribers.length < 1) {
@@ -286,21 +228,9 @@ const MassiveSubscribers = () => {
       );
 
       // console.log('response: ', response?.data?.data?.subscribers);
-      const formattedData = response?.data?.data?.subscribers.map(
-        (subscriber, index) => ({
-          id: index + 1,
-          count: index + 1,
-          startTime: formatDateToYMDHM(subscriber.startTime),
-          IMSI: subscriber.IMSI,
-          MSISDN: subscriber.MSISDN,
-          maskedMSISDN: "*******",
-          IMEI: subscriber.IMEI,
-          MM: subscriber.MM,
-          R: subscriber.R,
-          Location: subscriber.Location,
-          SiteName: subscriber?.matchingCoreArea?.SiteName,
-          SectorLocation: subscriber?.matchingCoreArea?.SectorLocation,
-        }),
+      const formattedData = mapSubscribersForDisplay(
+        response?.data?.data?.subscribers ?? [],
+        formatDateToYMDHM,
       );
 
       filtered = formattedData;
