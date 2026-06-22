@@ -21,7 +21,7 @@ const GoogleMapsEmbed = React.memo(({ coordinates }) => {
   const mapRef = useRef(null);
   const { isLoaded } = useJsApiLoader({
     id: 'f147f16e33a7b0e0',
-    googleMapsApiKey: 'AIzaSyDJOXNvQcvI8m7BdR5bc4xmDvxE_wly5Sg',
+    googleMapsApiKey: 'AIzaSyCdg6zLm-kRaOz7-iuFoNo7oVdlfqKc4mc',
   });
 
   const onLoad = useCallback((map) => {
